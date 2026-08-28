@@ -1,0 +1,125 @@
+package templates
+
+// Halaman Profil — self-reset password
+templ ProfilPage() {
+	@Layout("Profil", "", "") {
+		@Sidebar("profil")
+		<div class="main-content">
+			@Topbar("Profil")
+			<div class="content">
+				<div class="card mb-2">
+					<div class="card-header py-2"><i class="bi bi-person-circle"></i> Akun Saya</div>
+					<div class="card-body py-2">
+						<p class="mb-1"><strong>Username:</strong> <span id="meUser">-</span></p>
+						<p class="mb-0"><strong>Role:</strong> <span id="meRole">-</span></p>
+					</div>
+				</div>
+				<div class="card">
+					<div class="card-header py-2"><i class="bi bi-key"></i> Ganti Password</div>
+					<div class="card-body">
+						<div class="mb-3">
+							<label class="form-label fw-semibold">Password Lama</label>
+							<input type="password" class="form-control" id="oldPwd" placeholder="Password saat ini"/>
+						</div>
+						<div class="mb-3">
+							<label class="form-label fw-semibold">Password Baru</label>
+							<input type="password" class="form-control" id="newPwd" placeholder="Minimal 4 karakter"/>
+						</div>
+						<button class="btn btn-primary w-100" onclick="resetOwn()">
+							<i class="bi bi-check-lg"></i> Simpan Password Baru
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		@BottomNav("profil")
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+		<script>
+			async function loadMe() {
+				const res = await fetch('/api/auth/me');
+				const d = await res.json();
+				if (d.success) {
+					document.getElementById('meUser').textContent = d.data.username || '-';
+					document.getElementById('meRole').textContent = d.data.role || '-';
+				}
+			}
+			async function resetOwn() {
+				const oldP = document.getElementById('oldPwd').value;
+				const newP = document.getElementById('newPwd').value;
+				if (!oldP || !newP) { showToast('Isi password lama & baru', 'danger'); return; }
+				const res = await fetch('/api/me/reset-password', {
+					method: 'POST',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify({ old_password: oldP, new_password: newP })
+				});
+				const d = await res.json();
+				if (d.success) {
+					showToast('Password berhasil diubah');
+					document.getElementById('oldPwd').value = '';
+					document.getElementById('newPwd').value = '';
+				} else {
+					showToast(d.error || 'Gagal', 'danger');
+				}
+			}
+			loadMe();
+		</script>
+	}
+}
+
+// Halaman User Management (superadmin) — list user + reset password
+templ UsersPage() {
+	@Layout("User Management", "", "") {
+		@Sidebar("users")
+		<div class="main-content">
+			@Topbar("User Management")
+			<div class="content">
+				<div class="card">
+					<div class="card-header py-2"><i class="bi bi-people"></i> Daftar User</div>
+					<div class="table-responsive">
+						<table class="table table-hover mb-0">
+							<thead><tr><th>Username</th><th>Role</th><th>Instansi</th><th></th></tr></thead>
+							<tbody id="userTable">
+								<tr><td colspan="4" class="text-center text-muted py-4">Memuat...</td></tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+		@BottomNav("users")
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+		<script>
+			let allUsers = [];
+			async function loadUsers() {
+				const res = await fetch('/api/superadmin/users');
+				const d = await res.json();
+				if (!d.success) return;
+				allUsers = d.data;
+				const tb = document.getElementById('userTable');
+				tb.innerHTML = d.data.map(u => `
+					<tr>
+						<td>${u.username}</td>
+						<td><span class="badge ${u.role==='superadmin'?'bg-danger':'bg-primary'}">${u.role}</span></td>
+						<td><small class="text-muted">${u.instansi_nama || '-'}</small></td>
+						<td class="text-end">
+							<button class="btn btn-sm btn-outline-warning" onclick="resetUser('${u.id}','${u.username}')"><i class="bi bi-key"></i> Reset</button>
+						</td>
+					</tr>
+				`).join('');
+			}
+			function resetUser(id, username) {
+				const pwd = prompt('Password baru untuk ' + username + ' (minimal 4 karakter):');
+				if (!pwd || pwd.length < 4) { if (pwd!==null) showToast('Minimal 4 karakter', 'danger'); return; }
+				fetch('/api/superadmin/users/' + id + '/reset-password', {
+					method: 'POST',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify({ new_password: pwd })
+				}).then(r => r.json()).then(d => {
+					if (d.success) showToast('Password ' + username + ' direset');
+					else showToast(d.error || 'Gagal', 'danger');
+				});
+			}
+			loadUsers();
+		</script>
+	}
+}

@@ -1,0 +1,103 @@
+package templates
+
+templ ApprovalPage() {
+	@Layout("Approval", "", "") {
+		@Sidebar("settings")
+		<div class="main-content">
+			<header class="topbar">
+				<div class="d-flex align-items-center gap-3">
+					<button class="btn btn-sm btn-outline-secondary menu-btn" onclick="toggleSidebar()">
+						<i class="bi bi-list"></i>
+					</button>
+					<span class="page-title"><i class="bi bi-check-circle"></i> Approval Pendaftaran</span>
+				</div>
+				<a href="/settings" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i> Kembali</a>
+			</header>
+			<div class="content">
+				<h6 class="text-muted mb-3"><i class="bi bi-hourglass-split"></i> Menunggu Persetujuan</h6>
+				<div id="pendingList" class="mb-4">
+					<div class="text-center text-muted py-4">Memuat...</div>
+				</div>
+				<hr/>
+				<h6 class="text-muted mb-3"><i class="bi bi-clock-history"></i> Riwayat</h6>
+				<div id="recentList">
+					<div class="text-center text-muted py-4">Memuat...</div>
+				</div>
+			</div>
+		</div>
+		@BottomNav("settings")
+		<script>
+			async function loadApproval() {
+				const res = await fetch('/superadmin/approval');
+				const data = await res.json();
+				if (data.success) {
+					const pendingDiv = document.getElementById('pendingList');
+					if (data.data.pending.length === 0) {
+						pendingDiv.innerHTML = '<div class="alert alert-info" style="border-radius:12px;"><i class="bi bi-check-circle"></i> Tidak ada pendaftaran menunggu</div>';
+					} else {
+						pendingDiv.innerHTML = data.data.pending.map(i => `
+							<div class="card mb-3">
+								<div class="card-body">
+									<div class="d-flex justify-content-between align-items-start">
+										<div>
+											<h6 class="mb-1">${i.nama}</h6>
+											<p class="mb-1 text-muted"><small>${i.jns_instansi.toUpperCase()} · ${i.kabupaten}, ${i.provinsi}</small></p>
+											<p class="mb-2 text-muted"><small>Username: ${i.username || '-'} · WA: ${i.telepon || '-'}</small></p>
+										</div>
+										<span class="badge bg-warning text-dark">Pending</span>
+									</div>
+									<div class="d-flex gap-2">
+										<button class="btn btn-success btn-sm" onclick="approve('${i.id}')">
+											<i class="bi bi-check-lg"></i> Setujui
+										</button>
+										<button class="btn btn-danger btn-sm" onclick="reject('${i.id}')">
+											<i class="bi bi-x-lg"></i> Tolak
+										</button>
+									</div>
+								</div>
+							</div>
+						`).join('');
+					}
+					const recentDiv = document.getElementById('recentList');
+					if (data.data.recent.length === 0) {
+						recentDiv.innerHTML = '<div class="text-muted text-center py-3">Belum ada riwayat</div>';
+					} else {
+						recentDiv.innerHTML = data.data.recent.map(i => `
+							<div class="card mb-2">
+								<div class="card-body py-2 d-flex align-items-center justify-content-between">
+									<div>
+										<strong>${i.nama}</strong>
+										<small class="text-muted ms-2">${i.kabupaten}</small>
+									</div>
+									<span class="badge ${i.status==='approved'?'bg-success':'bg-danger'}">${i.status}</span>
+								</div>
+							</div>
+						`).join('');
+					}
+				}
+			}
+			async function approve(id) {
+				if (!confirm('Setujui pendaftaran ini?')) return;
+				await fetch(`/api/approval/${id}`, {
+					method: 'POST',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify({action: 'approve'})
+				});
+				loadApproval();
+				showToast('Pendaftaran disetujui');
+			}
+			async function reject(id) {
+				const reason = prompt('Alasan penolakan:');
+				if (reason === null) return;
+				await fetch(`/api/approval/${id}`, {
+					method: 'POST',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify({action: 'reject', reason})
+				});
+				loadApproval();
+				showToast('Pendaftaran ditolak', 'danger');
+			}
+			loadApproval();
+		</script>
+	}
+}

@@ -1,0 +1,96 @@
+package templates
+
+templ SettingsPage(username string, role string) {
+	@Layout("Pengaturan", username, role) {
+		@Sidebar("settings")
+		<div class="main-content">
+			@Topbar("Pengaturan")
+			<div class="content">
+				<!-- Info Akun -->
+				<div class="card mb-4">
+					<div class="card-header"><i class="bi bi-person-badge"></i> Info Akun</div>
+					<div class="card-body">
+						<div class="row mb-2">
+							<div class="col-4 text-muted">Username</div>
+							<div class="col-8 fw-semibold">{ username }</div>
+						</div>
+						<div class="row mb-2">
+							<div class="col-4 text-muted">Role</div>
+							<div class="col-8"><span class="badge bg-primary">{ role }</span></div>
+						</div>
+					</div>
+				</div>
+				if role == "superadmin" {
+					<!-- Super Admin Menu -->
+					<div class="card mb-2">
+						<div class="card-header"><i class="bi bi-shield-lock"></i> Super Admin</div>
+						<div class="card-body">
+							<a href="/approval" class="btn btn-outline-primary w-100 mb-2">
+								<i class="bi bi-check-circle"></i> Kelola Pendaftaran
+							</a>
+							<a href="/pegawai" class="btn btn-outline-secondary w-100">
+								<i class="bi bi-people"></i> Kelola Pegawai
+							</a>
+						</div>
+					</div>
+					<!-- Worker Concurrency -->
+					<div class="card mb-2">
+						<div class="card-header"><i class="bi bi-cpu"></i> Worker Scrape</div>
+						<div class="card-body">
+							<label class="form-label fw-semibold">Jumlah Worker Paralel</label>
+							<div class="d-flex gap-2">
+								<input type="number" min="1" max="100" class="form-control form-control-sm" id="concInput" value="8"/>
+								<button class="btn btn-success btn-sm" onclick="saveConc()">Simpan</button>
+							</div>
+							<small class="text-muted">Makin tinggi makin cepat, tapi hati-hati rate-limit Pusaka (max 60 req/jam/akun).</small>
+						</div>
+					</div>
+					<!-- Import Pegawai -->
+					<div class="card mb-2">
+						<div class="card-header"><i class="bi bi-upload"></i> Import Pegawai</div>
+						<div class="card-body">
+							<input type="file" class="form-control form-control-sm mb-2" id="pegawaiFile" accept=".json"/>
+							<button class="btn btn-primary btn-sm w-100" onclick="importPegawai()">
+								<i class="bi bi-cloud-upload"></i> Import dari JSON
+							</button>
+						</div>
+					</div>
+				}
+			</div>
+		</div>
+		@BottomNav("settings")
+		<script>
+			// Load concurrency saat page dibuka
+			(async () => {
+				try {
+					const res = await fetch('/api/admin/concurrency');
+					const d = await res.json();
+					if (d.success) document.getElementById('concInput').value = d.data.concurrency;
+				} catch {}
+			})();
+
+			async function saveConc() {
+				const n = parseInt(document.getElementById('concInput').value) || 1;
+				const res = await fetch('/api/admin/concurrency', {
+					method: 'POST',
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify({concurrency: n})
+				});
+				const d = await res.json();
+				if (d.success) showToast('Worker diatur ke ' + n);
+				else showToast(d.error || 'Gagal', 'danger');
+			}
+
+			async function importPegawai() {
+				const fileInput = document.getElementById('pegawaiFile');
+				if (!fileInput.files.length) { showToast('Pilih file JSON dulu', 'warning'); return; }
+				const formData = new FormData();
+				formData.append('file', fileInput.files[0]);
+				const res = await fetch('/api/admin/import-pegawai', { method: 'POST', body: formData });
+				const d = await res.json();
+				if (d.success) showToast('Import: ' + d.data.imported + ' pegawai, ' + d.data.skipped + ' skip');
+				else showToast(d.error || 'Gagal', 'danger');
+			}
+		</script>
+	}
+}

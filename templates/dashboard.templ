@@ -1,0 +1,271 @@
+package templates
+
+templ DashboardPage(username string) {
+	@Layout("Dashboard", username, "") {
+		@Sidebar("dashboard")
+		<div class="main-content">
+			@Topbar("Dashboard")
+			<div class="content">
+				<!-- Stat Cards - 6 columns (2 rows di mobile, 6 di desktop) -->
+				<div class="row g-2 mb-2">
+					<div class="col-4 col-lg-2">
+						<div class="stat-card total">
+							<div class="number" id="total">-</div>
+							<div class="label">Total</div>
+						</div>
+					</div>
+					<div class="col-4 col-lg-2">
+						<div class="stat-card hadir">
+							<div class="number text-success" id="hadir">-</div>
+							<div class="label">Hadir</div>
+						</div>
+					</div>
+					<div class="col-4 col-lg-2">
+						<div class="stat-card telat">
+							<div class="number text-warning" id="telat">-</div>
+							<div class="label">Telat</div>
+						</div>
+					</div>
+					<div class="col-4 col-lg-2">
+						<div class="stat-card" style="border-color:#fd7e14;">
+							<div class="number text-orange" id="belumMasuk" style="color:#fd7e14;">-</div>
+							<div class="label">Blm Masuk</div>
+						</div>
+					</div>
+					<div class="col-4 col-lg-2">
+						<div class="stat-card" style="border-color:#0dcaf0;">
+							<div class="number" id="belumPulang" style="color:#0dcaf0;">-</div>
+							<div class="label">Blm Pulang</div>
+						</div>
+					</div>
+					<div class="col-4 col-lg-2">
+						<div class="stat-card alfa">
+							<div class="number text-danger" id="alfa">-</div>
+							<div class="label">Alfa</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Tab Harian / Bulanan -->
+				<ul class="nav nav-pills mb-2" id="modeTabs">
+					<li class="nav-item"><button class="nav-link active btn-sm py-1" onclick="setMode('harian')">Harian</button></li>
+					<li class="nav-item"><button class="nav-link btn-sm py-1" onclick="setMode('bulanan')">Bulanan</button></li>
+				</ul>
+
+				<!-- Harian -->
+				<div id="harianView">
+					<div class="card mb-2">
+						<div class="card-body py-2">
+							<div class="d-flex align-items-center gap-2">
+								<label class="form-label mb-0 fw-semibold">Tanggal:</label>
+								<input type="date" class="form-control form-control-sm" style="width:auto;" id="datePicker" onchange="loadDashboard()"/>
+								<button class="btn btn-primary btn-sm" onclick="loadDashboard()"><i class="bi bi-search"></i></button>
+							</div>
+						</div>
+					</div>
+					<div class="card">
+						<div class="card-header d-flex justify-content-between align-items-center py-1">
+							<span><i class="bi bi-table"></i> Presensi</span>
+							<span class="badge bg-primary" id="tableCount">0</span>
+						</div>
+						<div class="table-responsive">
+							<table class="table table-sm table-hover mb-0">
+								<thead><tr><th>Nama</th><th class="text-center">Masuk</th><th class="text-center">Pulang</th><th class="text-center">Status</th></tr></thead>
+								<tbody id="absensiTable"><tr><td colspan="4" class="text-center text-muted py-3">Memuat...</td></tr></tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+
+				<!-- Bulanan -->
+				<div id="bulananView" style="display:none;">
+					<div class="card mb-2">
+						<div class="card-body py-2">
+							<div class="d-flex align-items-center gap-2 flex-wrap">
+								<label class="form-label mb-0 fw-semibold">Bulan:</label>
+								<select class="form-select form-select-sm" style="width:auto;" id="bulanPicker" onchange="loadBulan()">
+									for i := 1; i <= 12; i++ {
+										<option value={ templ.SafeURL(i) }>{ namaBulan(i) }</option>
+									}
+								</select>
+								<label class="form-label mb-0 fw-semibold">Tahun:</label>
+								<select class="form-select form-select-sm" style="width:auto;" id="tahunPicker" onchange="loadBulan()">
+									<option value="2026">2026</option>
+									<option value="2025">2025</option>
+								</select>
+								<button class="btn btn-success btn-sm" onclick="exportCSV()"><i class="bi bi-download"></i> CSV</button>
+							</div>
+						</div>
+					</div>
+					<!-- Sub-tab bulanan -->
+					<ul class="nav nav-pills mb-2" id="bulanTabs">
+						<li class="nav-item"><button class="nav-link active btn-sm py-1" onclick="setBulanMode('rekap')">Rekap Pegawai</button></li>
+						<li class="nav-item"><button class="nav-link btn-sm py-1" onclick="setBulanMode('detail')">Detail Harian</button></li>
+					</ul>
+					<div id="bulanRekapView">
+						<div class="card mb-2">
+							<div class="card-body py-2">
+								<div class="row g-2 text-center">
+									<div class="col-4"><div class="fw-bold" id="sumHari">-</div><div class="text-muted" style="font-size:0.65rem;">Hari Kerja</div></div>
+									<div class="col-4"><div class="fw-bold text-success" id="sumRata">-</div><div class="text-muted" style="font-size:0.65rem;">% Hadir</div></div>
+									<div class="col-4"><div class="fw-bold" id="sumPeg">-</div><div class="text-muted" style="font-size:0.65rem;">Pegawai</div></div>
+								</div>
+							</div>
+						</div>
+						<div class="card">
+							<div class="card-header py-1"><i class="bi bi-people"></i> Rekap per Pegawai</div>
+							<div class="table-responsive" style="max-height:50vh; overflow-y:auto;">
+								<table class="table table-sm table-hover mb-0">
+									<thead><tr><th>Nama</th><th class="text-center">Hadir</th><th class="text-center">Telat</th><th class="text-center">Alfa</th><th class="text-center">%</th></tr></thead>
+									<tbody id="bulanPegawaiTable"><tr><td colspan="5" class="text-center text-muted py-3">Memuat...</td></tr></tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+					<div id="bulanDetailView" style="display:none;">
+						<div class="card">
+							<div class="card-header py-1"><i class="bi bi-list-ul"></i> Detail Harian</div>
+							<div class="table-responsive" style="max-height:55vh; overflow-y:auto;">
+								<table class="table table-sm table-hover mb-0">
+									<thead><tr><th>Tanggal</th><th>Nama</th><th class="text-center">Masuk</th><th class="text-center">Pulang</th><th class="text-center">Status</th></tr></thead>
+									<tbody id="bulanDetailTable"><tr><td colspan="5" class="text-center text-muted py-3">Memuat...</td></tr></tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		@BottomNav("dashboard")
+		<script>
+			let currentMode = 'harian';
+			const bln = new Date().getMonth() + 1;
+			document.getElementById('datePicker').value = new Date().toISOString().split('T')[0];
+			document.getElementById('bulanPicker').value = bln;
+			loadDashboard();
+
+			function setMode(m) {
+				currentMode = m;
+				document.getElementById('harianView').style.display = m === 'harian' ? 'block' : 'none';
+				document.getElementById('bulananView').style.display = m === 'bulanan' ? 'block' : 'none';
+				document.querySelectorAll('#modeTabs .nav-link').forEach(b => b.classList.remove('active'));
+				event.target.classList.add('active');
+				if (m === 'bulanan') loadBulan();
+			}
+
+			function statusBadge(s) {
+			switch(s) {
+				case 'Belum Masuk': return 'bg-secondary';
+				case 'Belum Pulang': return 'bg-info';
+				case 'Terlambat': return 'bg-danger';
+				case 'Telat Ringan': return 'bg-warning';
+				case 'Tepat Waktu': return 'bg-success';
+				case 'Hadir': return 'bg-success';
+				default: return 'bg-secondary';
+			}
+		}
+
+		async function loadDashboard() {
+				const tgl = document.getElementById('datePicker').value;
+				const res = await fetch('/api/dashboard?tanggal=' + tgl);
+				const d = await res.json();
+				if (!d.success) return;
+				const r = d.data.rekap;
+				document.getElementById('total').textContent = r.total || 0;
+				document.getElementById('hadir').textContent = r.hadir || 0;
+				document.getElementById('telat').textContent = r.terlambat || 0;
+				document.getElementById('belumMasuk').textContent = r.belum_masuk || 0;
+				document.getElementById('belumPulang').textContent = r.belum_pulang || 0;
+				document.getElementById('alfa').textContent = r.tidak_hadir || 0;
+				const tb = document.getElementById('absensiTable');
+				const rows = d.data.absensi;
+				document.getElementById('tableCount').textContent = rows.length;
+				if (rows.length === 0) {
+					tb.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">Belum ada data</td></tr>';
+				} else {
+					tb.innerHTML = rows.map(a => `
+						<tr>
+							<td>${a.nama}</td>
+							<td class="text-center">${a.jam_masuk || '-'}</td>
+							<td class="text-center">${a.jam_pulang || '-'}</td>
+							<td class="text-center"><span class="badge ${statusBadge(a.status)}">${a.status || (a.jam_masuk ? 'Hadir' : 'Alfa')}</span></td>
+						</tr>
+					`).join('');
+				}
+			}
+
+			async function loadBulan() {
+				loadBulanPegawai();
+				loadBulanDetail();
+			}
+
+			function setBulanMode(m) {
+				document.getElementById('bulanRekapView').style.display = m === 'rekap' ? 'block' : 'none';
+				document.getElementById('bulanDetailView').style.display = m === 'detail' ? 'block' : 'none';
+				document.querySelectorAll('#bulanTabs .nav-link').forEach(b => b.classList.remove('active'));
+				event.target.classList.add('active');
+				if (m === 'detail') loadBulanDetail();
+				else loadBulanPegawai();
+			}
+
+			async function loadBulanPegawai() {
+				const bln = document.getElementById('bulanPicker').value;
+				const thn = document.getElementById('tahunPicker').value;
+				const res = await fetch('/api/dashboard/bulan-pegawai?bulan=' + bln + '&tahun=' + thn);
+				const d = await res.json();
+				if (!d.success) return;
+				document.getElementById('sumHari').textContent = d.data.hari_kerja || 0;
+				document.getElementById('sumPeg').textContent = d.data.rekap_pegawai.length || 0;
+				const tb = document.getElementById('bulanPegawaiTable');
+				const rows = d.data.rekap_pegawai;
+				if (rows.length === 0) {
+					tb.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">Belum ada data</td></tr>';
+					document.getElementById('sumRata').textContent = '0%';
+					return;
+				}
+				let totalHadir = 0, totalHK = (d.data.hari_kerja || 0) * rows.length;
+				rows.forEach(r => totalHadir += r.hadir);
+				const rata = totalHK > 0 ? (totalHadir / totalHK * 100).toFixed(0) + '%' : '0%';
+				document.getElementById('sumRata').textContent = rata;
+				tb.innerHTML = rows.map(r => `
+					<tr>
+						<td>${r.nama}</td>
+						<td class="text-center">${r.hadir}</td>
+						<td class="text-center text-warning">${r.terlambat}</td>
+						<td class="text-center text-danger">${r.tidak_hadir}</td>
+						<td class="text-center fw-bold ${r.persen >= 80 ? 'text-success' : 'text-danger'}">${r.persen.toFixed(0)}%</td>
+					</tr>
+				`).join('');
+			}
+
+			async function loadBulanDetail() {
+				const bln = document.getElementById('bulanPicker').value;
+				const thn = document.getElementById('tahunPicker').value;
+				const res = await fetch('/api/dashboard/bulan-detail?bulan=' + bln + '&tahun=' + thn);
+				const d = await res.json();
+				if (!d.success) return;
+				const tb = document.getElementById('bulanDetailTable');
+				const rows = d.data.detail;
+				if (rows.length === 0) {
+					tb.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">Belum ada data</td></tr>';
+					return;
+				}
+				tb.innerHTML = rows.map(a => `
+					<tr>
+						<td>${a.tanggal}</td>
+						<td>${a.nama}</td>
+						<td class="text-center">${a.jam_masuk || '-'}</td>
+						<td class="text-center">${a.jam_pulang || '-'}</td>
+						<td class="text-center"><span class="badge ${statusBadge(a.status)}">${a.status || '-'}</span></td>
+					</tr>
+				`).join('');
+			}
+
+			function exportCSV() {
+				const bln = document.getElementById('bulanPicker').value;
+				const thn = document.getElementById('tahunPicker').value;
+				window.location.href = '/api/admin/export-csv?bulan=' + bln + '&tahun=' + thn;
+			}
+		</script>
+	}
+}
