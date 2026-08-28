@@ -42,7 +42,7 @@ func AuthLayout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - Pusaka Monitor</title><link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css\" rel=\"stylesheet\"><link href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css\" rel=\"stylesheet\"><link href=\"/static/css/app.css?v=2\" rel=\"stylesheet\"></head><body>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - Pusaka Monitor</title><link href=\"https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/basecoat.cdn.min.css\" rel=\"stylesheet\"><link href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css\" rel=\"stylesheet\"><link href=\"/static/css/app.css?v=3\" rel=\"stylesheet\"></head><body class=\"bg-background text-foreground\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -50,7 +50,7 @@ func AuthLayout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js\"></script><script src=\"/static/js/app.js\"></script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<footer class=\"app-disclaimer\"><i class=\"bi bi-info-circle\"></i> Aplikasi ini <strong>HANYA membaca</strong> riwayat presensi dari Pusaka Kemenag. Tidak melakukan, mengubah, atau membuat data absensi fiktif/palsu.</footer><script src=\"https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/js/basecoat.min.js\" defer></script><script src=\"/static/js/app.js\"></script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -96,25 +96,25 @@ func LoginPage(errorMsg string) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if errorMsg != "" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"alert alert-danger\" style=\"border-radius:6px;\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<div class=\"alert\" data-variant=\"destructive\" id=\"loginError\" style=\"font-size:0.75rem;\"><i class=\"bi bi-exclamation-circle\"></i><section>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(errorMsg)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/auth.templ`, Line: 31, Col: 74}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/auth.templ`, Line: 38, Col: 25}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "</section></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<form id=\"loginForm\"><div class=\"mb-3\"><label class=\"form-label fw-semibold\">Username</label> <input type=\"text\" class=\"form-control\" id=\"username\" placeholder=\"Masukkan username\" required></div><div class=\"mb-3\"><label class=\"form-label fw-semibold\">Password</label> <input type=\"password\" class=\"form-control\" id=\"password\" placeholder=\"Masukkan password\" required></div><button type=\"submit\" class=\"btn btn-primary w-100 py-2 fw-semibold\">Masuk</button></form><div class=\"text-center mt-3\"><span class=\"text-muted\">Belum punya akun?</span> <a href=\"/register\" class=\"text-decoration-none\">Daftar</a></div></div></div><div class=\"text-center mt-3 px-3\" style=\"max-width:360px; color:#fff; font-size:0.62rem; opacity:0.85;\"><i class=\"bi bi-info-circle\"></i> Aplikasi ini <strong>HANYA membaca</strong> riwayat presensi dari Pusaka Kemenag. Tidak melakukan, mengubah, atau membuat data absensi fiktif/palsu.</div><script>\n\t\t\tdocument.getElementById('loginForm').addEventListener('submit', async (e) => {\n\t\t\t\te.preventDefault();\n\t\t\t\tconst errorDiv = document.querySelector('.alert-danger');\n\t\t\t\tif (errorDiv) errorDiv.style.display = 'none';\n\t\t\t\tconst res = await fetch('/api/auth/login', {\n\t\t\t\t\tmethod: 'POST',\n\t\t\t\t\theaders: { 'Content-Type': 'application/json' },\n\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\tusername: document.getElementById('username').value,\n\t\t\t\t\t\tpassword: document.getElementById('password').value\n\t\t\t\t\t})\n\t\t\t\t});\n\t\t\t\tconst data = await res.json();\n\t\t\t\tif (data.success) { window.location.href = '/'; }\n\t\t\t\telse {\n\t\t\t\t\tif (errorDiv) { errorDiv.textContent = data.error || 'Login gagal'; errorDiv.style.display = 'block'; }\n\t\t\t\t\telse { alert(data.error || 'Login gagal'); }\n\t\t\t\t}\n\t\t\t});\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "<form id=\"loginForm\" class=\"form space-y-4\"><div class=\"grid gap-2\"><label for=\"username\" class=\"label\">Username</label> <input type=\"text\" class=\"input\" id=\"username\" placeholder=\"Masukkan username\" required></div><div class=\"grid gap-2\"><label for=\"password\" class=\"label\">Password</label> <input type=\"password\" class=\"input\" id=\"password\" placeholder=\"Masukkan password\" required></div><button type=\"submit\" class=\"btn w-full\">Masuk</button></form><div class=\"text-center mt-3\" style=\"font-size:0.75rem;\"><span class=\"text-muted-foreground\">Belum punya akun?</span> <a href=\"/register\" class=\"text-decoration-none\">Daftar</a></div></div></div><div class=\"text-center mt-3 px-3\" style=\"max-width:360px; color:#fff; font-size:0.62rem; opacity:0.85; margin: 0 auto;\"><i class=\"bi bi-info-circle\"></i> Aplikasi ini <strong>HANYA membaca</strong> riwayat presensi dari Pusaka Kemenag. Tidak melakukan, mengubah, atau membuat data absensi fiktif/palsu.</div><script>\n\t\t\tdocument.getElementById('loginForm').addEventListener('submit', async (e) => {\n\t\t\t\te.preventDefault();\n\t\t\t\tconst errorDiv = document.getElementById('loginError');\n\t\t\t\tif (errorDiv) errorDiv.style.display = 'none';\n\t\t\t\tconst res = await fetch('/api/auth/login', {\n\t\t\t\t\tmethod: 'POST',\n\t\t\t\t\theaders: { 'Content-Type': 'application/json' },\n\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\tusername: document.getElementById('username').value,\n\t\t\t\t\t\tpassword: document.getElementById('password').value\n\t\t\t\t\t})\n\t\t\t\t});\n\t\t\t\tconst data = await res.json();\n\t\t\t\tif (data.success) { window.location.href = '/'; }\n\t\t\t\telse {\n\t\t\t\t\tif (errorDiv) { errorDiv.querySelector('section').textContent = data.error || 'Login gagal'; errorDiv.style.display = 'block'; }\n\t\t\t\t\telse { alert(data.error || 'Login gagal'); }\n\t\t\t\t}\n\t\t\t});\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -161,107 +161,13 @@ func RegisterPage() templ.Component {
 				}()
 			}
 			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"auth-container\"><div class=\"auth-card\" style=\"max-width:480px;\"><div class=\"text-center mb-3\"><i class=\"bi bi-person-plus\" style=\"font-size:2.5rem; color:#198754;\"></i></div><h4 class=\"mb-3\">Daftar Akun Baru</h4><div id=\"registerMsg\" class=\"alert d-none\" style=\"border-radius:6px;\"></div><form id=\"registerForm\"><div class=\"mb-2\"><label class=\"form-label fw-semibold\">Nama Instansi <span class=\"text-danger\">*</span></label> <input type=\"text\" class=\"form-control\" id=\"nama_instansi\" placeholder=\"Contoh: KUA Kec. Pakue\" required></div><div class=\"row g-2 mb-2\"><div class=\"col-6\"><label class=\"form-label fw-semibold\">Jenis <span class=\"text-danger\">*</span></label> <select class=\"form-select\" id=\"jns_instansi\" required><option value=\"kua\">KUA</option> <option value=\"mtsn\">MTsN</option> <option value=\"min\">MIN</option> <option value=\"man\">MAN</option></select></div><div class=\"col-6\"><label class=\"form-label fw-semibold\">Telepon/WA</label> <input type=\"text\" class=\"form-control\" id=\"telepon\" placeholder=\"08xxx\"></div></div><div class=\"row g-2 mb-2\"><div class=\"col-6\"><label class=\"form-label fw-semibold\">Kabupaten <span class=\"text-danger\">*</span></label> <input type=\"text\" class=\"form-control\" id=\"kabupaten\" required></div><div class=\"col-6\"><label class=\"form-label fw-semibold\">Provinsi <span class=\"text-danger\">*</span></label> <input type=\"text\" class=\"form-control\" id=\"provinsi\" required></div></div><hr class=\"my-2\"><div class=\"mb-2\"><label class=\"form-label fw-semibold\">Username <span class=\"text-danger\">*</span></label> <input type=\"text\" class=\"form-control\" id=\"username\" placeholder=\"Untuk login\" required></div><div class=\"mb-3\"><label class=\"form-label fw-semibold\">Password <span class=\"text-danger\">*</span></label> <input type=\"password\" class=\"form-control\" id=\"password\" placeholder=\"Min. 6 karakter\" minlength=\"6\" required></div><button type=\"submit\" class=\"btn btn-success w-100 py-2 fw-semibold\">Daftar</button></form><div class=\"text-center mt-3\"><span class=\"text-muted\">Sudah punya akun?</span> <a href=\"/login\" class=\"text-decoration-none\">Login</a></div></div></div><script>\n\t\t\tdocument.getElementById('registerForm').addEventListener('submit', async (e) => {\n\t\t\t\te.preventDefault();\n\t\t\t\tconst msgDiv = document.getElementById('registerMsg');\n\t\t\t\tmsgDiv.classList.add('d-none');\n\t\t\t\tconst res = await fetch('/api/auth/register', {\n\t\t\t\t\tmethod: 'POST',\n\t\t\t\t\theaders: { 'Content-Type': 'application/json' },\n\t\t\t\t\tbody: JSON.stringify({\n\t\t\t\t\t\tnama_instansi: document.getElementById('nama_instansi').value,\n\t\t\t\t\t\tjns_instansi: document.getElementById('jns_instansi').value,\n\t\t\t\t\t\tkabupaten: document.getElementById('kabupaten').value,\n\t\t\t\t\t\tprovinsi: document.getElementById('provinsi').value,\n\t\t\t\t\t\ttelepon: document.getElementById('telepon').value,\n\t\t\t\t\t\tusername: document.getElementById('username').value,\n\t\t\t\t\t\tpassword: document.getElementById('password').value\n\t\t\t\t\t})\n\t\t\t\t});\n\t\t\t\tconst data = await res.json();\n\t\t\t\tif (data.success) {\n\t\t\t\t\tmsgDiv.className = 'alert alert-success';\n\t\t\t\t\tmsgDiv.textContent = data.message || 'Pendaftaran berhasil!';\n\t\t\t\t\tmsgDiv.classList.remove('d-none');\n\t\t\t\t\tdocument.getElementById('registerForm').reset();\n\t\t\t\t} else {\n\t\t\t\t\tmsgDiv.className = 'alert alert-danger';\n\t\t\t\t\tmsgDiv.textContent = data.error || 'Register gagal';\n\t\t\t\t\tmsgDiv.classList.remove('d-none');\n\t\t\t\t}\n\t\t\t});\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<div class=\"auth-container\"><div class=\"auth-card\" style=\"max-width:480px;\"><div class=\"text-center mb-3\"><i class=\"bi bi-person-plus\" style=\"font-size:2.5rem; color:#198754;\"></i></div><h4 class=\"mb-3\">Daftar Akun Baru</h4><div id=\"registerMsg\" class=\"alert\" style=\"font-size:0.75rem; display:none;\"></div><form id=\"registerForm\" class=\"form space-y-4\"><div class=\"grid gap-2\"><label class=\"label\">Nama Instansi <span class=\"text-destructive\">*</span></label> <input type=\"text\" class=\"input\" id=\"nama_instansi\" required></div><div class=\"grid gap-2\"><label class=\"label\">Jenis Instansi <span class=\"text-destructive\">*</span></label> <select class=\"input\" id=\"jns_instansi\"><option value=\"madrasah\">Madrasah</option> <option value=\"kua\">KUA</option> <option value=\"kemenag\">Kantor Kemenag</option></select></div><div class=\"grid gap-2\"><label class=\"label\">Kabupaten <span class=\"text-destructive\">*</span></label> <input type=\"text\" class=\"input\" id=\"kabupaten\" required></div><div class=\"grid gap-2\"><label class=\"label\">Provinsi <span class=\"text-destructive\">*</span></label> <input type=\"text\" class=\"input\" id=\"provinsi\" value=\"Sulawesi Tenggara\" required></div><div class=\"grid gap-2\"><label class=\"label\">Telepon</label> <input type=\"text\" class=\"input\" id=\"telepon\"></div><div class=\"grid gap-2\"><label class=\"label\">Username <span class=\"text-destructive\">*</span></label> <input type=\"text\" class=\"input\" id=\"username\" required></div><div class=\"grid gap-2\"><label class=\"label\">Password <span class=\"text-destructive\">*</span></label> <input type=\"password\" class=\"input\" id=\"password\" required></div><button type=\"submit\" class=\"btn w-full\">Daftar</button></form><div class=\"text-center mt-3\" style=\"font-size:0.75rem;\"><span class=\"text-muted-foreground\">Sudah punya akun?</span> <a href=\"/login\" class=\"text-decoration-none\">Masuk</a></div></div></div><script src=\"/static/js/register.js\"></script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			return nil
 		})
 		templ_7745c5c3_Err = AuthLayout("Daftar").Render(templ.WithChildren(ctx, templ_7745c5c3_Var7), templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
-}
-
-func PendingPage() templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var8 == nil {
-			templ_7745c5c3_Var8 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var9 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-			if !templ_7745c5c3_IsBuffer {
-				defer func() {
-					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-					if templ_7745c5c3_Err == nil {
-						templ_7745c5c3_Err = templ_7745c5c3_BufErr
-					}
-				}()
-			}
-			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "<div class=\"status-page\"><div class=\"status-card\"><i class=\"bi bi-hourglass-split text-warning\"></i><h3>Menunggu Persetujuan</h3><p class=\"text-muted mb-3\">Pendaftaran Anda sedang diverifikasi admin. Coba login kembali nanti.</p><a href=\"/login\" class=\"btn btn-primary px-4\"><i class=\"bi bi-arrow-left\"></i> Kembali ke Login</a></div></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			return nil
-		})
-		templ_7745c5c3_Err = AuthLayout("Menunggu").Render(templ.WithChildren(ctx, templ_7745c5c3_Var9), templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		return nil
-	})
-}
-
-func RejectedPage() templ.Component {
-	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
-			return templ_7745c5c3_CtxErr
-		}
-		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-		if !templ_7745c5c3_IsBuffer {
-			defer func() {
-				templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-				if templ_7745c5c3_Err == nil {
-					templ_7745c5c3_Err = templ_7745c5c3_BufErr
-				}
-			}()
-		}
-		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var10 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var10 == nil {
-			templ_7745c5c3_Var10 = templ.NopComponent
-		}
-		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var11 := templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
-			templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
-			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templruntime.GetBuffer(templ_7745c5c3_W)
-			if !templ_7745c5c3_IsBuffer {
-				defer func() {
-					templ_7745c5c3_BufErr := templruntime.ReleaseBuffer(templ_7745c5c3_Buffer)
-					if templ_7745c5c3_Err == nil {
-						templ_7745c5c3_Err = templ_7745c5c3_BufErr
-					}
-				}()
-			}
-			ctx = templ.InitializeContext(ctx)
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "<div class=\"status-page\"><div class=\"status-card\"><i class=\"bi bi-x-circle text-danger\"></i><h3>Pendaftaran Ditolak</h3><p class=\"text-muted mb-3\">Maaf, pendaftaran tidak disetujui. Hubungi admin untuk info.</p><a href=\"/login\" class=\"btn btn-primary px-4\"><i class=\"bi bi-arrow-left\"></i> Kembali ke Login</a></div></div>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			return nil
-		})
-		templ_7745c5c3_Err = AuthLayout("Ditolak").Render(templ.WithChildren(ctx, templ_7745c5c3_Var11), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

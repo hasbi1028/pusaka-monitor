@@ -56,7 +56,7 @@ func Layout(title string, username string, role string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - Pusaka Monitor</title><link href=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css\" rel=\"stylesheet\"><link href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css\" rel=\"stylesheet\"><link href=\"/static/css/app.css?v=2\" rel=\"stylesheet\"></head><body><div class=\"marquee-bar\"><div class=\"marquee-content\"><i class=\"bi bi-info-circle\"></i> Aplikasi ini <strong>HANYA membaca</strong> riwayat presensi dari Pusaka Kemenag &mdash; tidak melakukan, mengubah, atau membuat data absensi fiktif/palsu. &nbsp;&nbsp;&bull;&nbsp;&nbsp; Data diambil secara otomatis untuk rekap kehadiran &nbsp;&nbsp;&bull;&nbsp;&nbsp; Pusaka Monitor v1.0</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - Pusaka Monitor</title><link href=\"https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/basecoat.cdn.min.css\" rel=\"stylesheet\"><link href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css\" rel=\"stylesheet\"><link href=\"/static/css/app.css?v=3\" rel=\"stylesheet\"></head><body class=\"bg-background text-foreground\"><div class=\"marquee-bar\"><div class=\"marquee-content\"><i class=\"bi bi-info-circle\"></i> Aplikasi ini <strong>HANYA membaca</strong> riwayat presensi dari Pusaka Kemenag &mdash; tidak melakukan, mengubah, atau membuat data absensi fiktif/palsu. &nbsp;&nbsp;&bull;&nbsp;&nbsp; Data diambil secara otomatis untuk rekap kehadiran &nbsp;&nbsp;&bull;&nbsp;&nbsp; Pusaka Monitor v1.0</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -64,7 +64,7 @@ func Layout(title string, username string, role string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<footer class=\"app-disclaimer\"><i class=\"bi bi-info-circle\"></i> Aplikasi ini <strong>HANYA membaca</strong> riwayat presensi dari Pusaka Kemenag. Tidak melakukan, mengubah, atau membuat data absensi fiktif/palsu.</footer><script src=\"https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js\"></script><script src=\"/static/js/app.js\"></script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "<footer class=\"app-disclaimer\"><i class=\"bi bi-info-circle\"></i> Aplikasi ini <strong>HANYA membaca</strong> riwayat presensi dari Pusaka Kemenag. Tidak melakukan, mengubah, atau membuat data absensi fiktif/palsu.</footer><script src=\"https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/js/basecoat.min.js\" defer></script><script src=\"/static/js/app.js\"></script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -93,11 +93,11 @@ func Sidebar(activePage string) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"sidebar-overlay\" id=\"sidebarOverlay\" onclick=\"toggleSidebar()\"></div><aside class=\"sidebar\" id=\"sidebar\"><div class=\"brand\"><i class=\"bi bi-calendar-check\"></i> <span>Pusaka Monitor</span></div><ul class=\"nav-menu\"><li>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"sidebar-overlay\" id=\"sidebarOverlay\" onclick=\"toggleSidebar()\"></div><aside class=\"sidebar\" id=\"sidebar\"><div class=\"brand\"><i class=\"bi bi-calendar-check\"></i> <span>Pusaka Monitor</span></div><nav class=\"nav-menu\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var4 = []any{activePage == "dashboard"}
+		var templ_7745c5c3_Var4 = []any{"nav-link", activePage == "dashboard"}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var4...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -115,11 +115,11 @@ func Sidebar(activePage string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"><i class=\"bi bi-house-door\"></i> Beranda</a></li><li>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\"><i class=\"bi bi-house-door\"></i> Beranda</a> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var6 = []any{activePage == "pegawai"}
+		var templ_7745c5c3_Var6 = []any{"nav-link", activePage == "pegawai"}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var6...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -137,11 +137,11 @@ func Sidebar(activePage string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\"><i class=\"bi bi-people\"></i> Pegawai</a></li><li>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "\"><i class=\"bi bi-people\"></i> Pegawai</a> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var8 = []any{activePage == "scrape"}
+		var templ_7745c5c3_Var8 = []any{"nav-link", activePage == "scrape"}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var8...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -159,11 +159,11 @@ func Sidebar(activePage string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\"><i class=\"bi bi-arrow-repeat\"></i> Scrape</a></li><li>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "\"><i class=\"bi bi-arrow-repeat\"></i> Scrape</a> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var10 = []any{activePage == "profil"}
+		var templ_7745c5c3_Var10 = []any{"nav-link", activePage == "profil"}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var10...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -181,11 +181,11 @@ func Sidebar(activePage string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\"><i class=\"bi bi-person-circle\"></i> Profil</a></li><li>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "\"><i class=\"bi bi-person-circle\"></i> Profil</a> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var12 = []any{activePage == "settings"}
+		var templ_7745c5c3_Var12 = []any{"nav-link", activePage == "settings"}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var12...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -203,11 +203,11 @@ func Sidebar(activePage string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\"><i class=\"bi bi-gear\"></i> Pengaturan</a></li><li>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 14, "\"><i class=\"bi bi-gear\"></i> Pengaturan</a> ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var14 = []any{activePage == "users"}
+		var templ_7745c5c3_Var14 = []any{"nav-link", activePage == "users"}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var14...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -225,7 +225,7 @@ func Sidebar(activePage string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\"><i class=\"bi bi-people-fill\"></i> User Mgmt</a></li><li style=\"border-top:1px solid rgba(255,255,255,0.1); margin-top:8px; padding-top:8px;\"><a href=\"#\" onclick=\"logout()\" style=\"color:#ff6b6b;\"><i class=\"bi bi-box-arrow-right\"></i> Keluar</a></li></ul></aside>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\"><i class=\"bi bi-people-fill\"></i> User Mgmt</a> <a href=\"#\" onclick=\"logout()\" class=\"nav-link logout-link\"><i class=\"bi bi-box-arrow-right\"></i> Keluar</a></nav></aside>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -254,14 +254,14 @@ func Topbar(title string) templ.Component {
 			templ_7745c5c3_Var16 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<header class=\"topbar\"><div class=\"d-flex align-items-center gap-2\"><button class=\"btn btn-sm btn-outline-secondary menu-btn\" onclick=\"toggleSidebar()\"><i class=\"bi bi-list\"></i></button> <span class=\"page-title\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 17, "<header class=\"topbar\"><div class=\"flex items-center gap-2\"><button class=\"btn\" data-variant=\"ghost\" data-size=\"icon\" onclick=\"toggleSidebar()\"><i class=\"bi bi-list\"></i></button> <span class=\"page-title\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/layout.templ`, Line: 73, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/layout.templ`, Line: 71, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {

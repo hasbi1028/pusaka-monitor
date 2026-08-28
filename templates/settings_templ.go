@@ -53,38 +53,38 @@ func SettingsPage(username string, role string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"content\"><!-- Info Akun --><div class=\"card mb-4\"><div class=\"card-header\"><i class=\"bi bi-person-badge\"></i> Info Akun</div><div class=\"card-body\"><div class=\"row mb-2\"><div class=\"col-4 text-muted\">Username</div><div class=\"col-8 fw-semibold\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"content\"><!-- Info Akun --><div class=\"card mb-4\"><header class=\"card-header\"><i class=\"bi bi-person-badge\"></i> Info Akun</header><section class=\"card-body\"><div class=\"grid grid-cols-3 gap-2 mb-2\"><div class=\"text-muted-foreground\">Username</div><div class=\"col-span-2 font-semibold\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(username)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/settings.templ`, Line: 15, Col: 48}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/settings.templ`, Line: 15, Col: 55}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></div><div class=\"row mb-2\"><div class=\"col-4 text-muted\">Role</div><div class=\"col-8\"><span class=\"badge bg-primary\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div></div><div class=\"grid grid-cols-3 gap-2\"><div class=\"text-muted-foreground\">Role</div><div class=\"col-span-2\"><span class=\"badge\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(role)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/settings.templ`, Line: 19, Col: 63}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/settings.templ`, Line: 19, Col: 57}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span></div></div></div></div>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</span></div></div></section></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if role == "superadmin" {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- Super Admin Menu --> <div class=\"card mb-2\"><div class=\"card-header\"><i class=\"bi bi-shield-lock\"></i> Super Admin</div><div class=\"card-body\"><a href=\"/approval\" class=\"btn btn-outline-primary w-100 mb-2\"><i class=\"bi bi-check-circle\"></i> Kelola Pendaftaran</a> <a href=\"/pegawai\" class=\"btn btn-outline-secondary w-100\"><i class=\"bi bi-people\"></i> Kelola Pegawai</a></div></div><!-- Worker Concurrency --> <div class=\"card mb-2\"><div class=\"card-header\"><i class=\"bi bi-cpu\"></i> Worker Scrape</div><div class=\"card-body\"><label class=\"form-label fw-semibold\">Jumlah Worker Paralel</label><div class=\"d-flex gap-2\"><input type=\"number\" min=\"1\" max=\"100\" class=\"form-control form-control-sm\" id=\"concInput\" value=\"8\"> <button class=\"btn btn-success btn-sm\" onclick=\"saveConc()\">Simpan</button></div><small class=\"text-muted\">Makin tinggi makin cepat, tapi hati-hati rate-limit Pusaka (max 60 req/jam/akun).</small></div></div><!-- Import Pegawai --> <div class=\"card mb-2\"><div class=\"card-header\"><i class=\"bi bi-upload\"></i> Import Pegawai</div><div class=\"card-body\"><input type=\"file\" class=\"form-control form-control-sm mb-2\" id=\"pegawaiFile\" accept=\".json\"> <button class=\"btn btn-primary btn-sm w-100\" onclick=\"importPegawai()\"><i class=\"bi bi-cloud-upload\"></i> Import dari JSON</button></div></div>")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!-- Super Admin Menu --> <div class=\"card mb-2\"><header class=\"card-header\"><i class=\"bi bi-shield-lock\"></i> Super Admin</header><section class=\"card-body\"><a href=\"/approval\" class=\"btn w-full mb-2\" data-variant=\"outline\"><i class=\"bi bi-check-circle\"></i> Kelola Pendaftaran</a> <a href=\"/superadmin/users\" class=\"btn w-full\" data-variant=\"outline\"><i class=\"bi bi-people\"></i> User Management</a></section></div><!-- Worker Concurrency --> <div class=\"card mb-2\"><header class=\"card-header\"><i class=\"bi bi-cpu\"></i> Worker Scrape</header><section class=\"card-body\"><label class=\"label font-semibold\">Jumlah Worker Paralel</label><div class=\"flex gap-2\"><input type=\"number\" min=\"1\" max=\"100\" class=\"input\" id=\"concInput\" value=\"8\"> <button class=\"btn btn-sm\" data-variant=\"outline\" onclick=\"saveConc()\">Simpan</button></div><small class=\"text-muted-foreground\">Makin tinggi makin cepat, tapi hati-hati rate-limit Pusaka (max 60 req/jam/akun).</small></section></div><!-- Import Pegawai --> <div class=\"card mb-2\"><header class=\"card-header\"><i class=\"bi bi-upload\"></i> Import Pegawai</header><section class=\"card-body\"><input type=\"file\" class=\"input mb-2\" id=\"pegawaiFile\" accept=\".json\"> <button class=\"btn btn-sm w-full\" onclick=\"importPegawai()\"><i class=\"bi bi-cloud-upload\"></i> Import dari JSON</button></section></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -97,7 +97,7 @@ func SettingsPage(username string, role string) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " <script>\n\t\t\t// Load concurrency saat page dibuka\n\t\t\t(async () => {\n\t\t\t\ttry {\n\t\t\t\t\tconst res = await fetch('/api/admin/concurrency');\n\t\t\t\t\tconst d = await res.json();\n\t\t\t\t\tif (d.success) document.getElementById('concInput').value = d.data.concurrency;\n\t\t\t\t} catch {}\n\t\t\t})();\n\n\t\t\tasync function saveConc() {\n\t\t\t\tconst n = parseInt(document.getElementById('concInput').value) || 1;\n\t\t\t\tconst res = await fetch('/api/admin/concurrency', {\n\t\t\t\t\tmethod: 'POST',\n\t\t\t\t\theaders: {'Content-Type': 'application/json'},\n\t\t\t\t\tbody: JSON.stringify({concurrency: n})\n\t\t\t\t});\n\t\t\t\tconst d = await res.json();\n\t\t\t\tif (d.success) showToast('Worker diatur ke ' + n);\n\t\t\t\telse showToast(d.error || 'Gagal', 'danger');\n\t\t\t}\n\n\t\t\tasync function importPegawai() {\n\t\t\t\tconst fileInput = document.getElementById('pegawaiFile');\n\t\t\t\tif (!fileInput.files.length) { showToast('Pilih file JSON dulu', 'warning'); return; }\n\t\t\t\tconst formData = new FormData();\n\t\t\t\tformData.append('file', fileInput.files[0]);\n\t\t\t\tconst res = await fetch('/api/admin/import-pegawai', { method: 'POST', body: formData });\n\t\t\t\tconst d = await res.json();\n\t\t\t\tif (d.success) showToast('Import: ' + d.data.imported + ' pegawai, ' + d.data.skipped + ' skip');\n\t\t\t\telse showToast(d.error || 'Gagal', 'danger');\n\t\t\t}\n\t\t</script>")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, " <script>\n\t\t\t(async () => {\n\t\t\t\ttry {\n\t\t\t\t\tconst res = await fetch('/api/admin/concurrency');\n\t\t\t\t\tconst d = await res.json();\n\t\t\t\t\tif (d.success) document.getElementById('concInput').value = d.data.concurrency;\n\t\t\t\t} catch {}\n\t\t\t})();\n\n\t\t\tasync function saveConc() {\n\t\t\t\tconst n = parseInt(document.getElementById('concInput').value) || 1;\n\t\t\t\tconst res = await fetch('/api/admin/concurrency', {\n\t\t\t\t\tmethod: 'POST',\n\t\t\t\t\theaders: {'Content-Type': 'application/json'},\n\t\t\t\t\tbody: JSON.stringify({concurrency: n})\n\t\t\t\t});\n\t\t\t\tconst d = await res.json();\n\t\t\t\tif (d.success) showToast('Worker diatur ke ' + n);\n\t\t\t\telse showToast(d.error || 'Gagal', 'danger');\n\t\t\t}\n\n\t\t\tasync function importPegawai() {\n\t\t\t\tconst fileInput = document.getElementById('pegawaiFile');\n\t\t\t\tif (!fileInput.files.length) { showToast('Pilih file JSON dulu', 'warning'); return; }\n\t\t\t\tconst formData = new FormData();\n\t\t\t\tformData.append('file', fileInput.files[0]);\n\t\t\t\tconst res = await fetch('/api/admin/import-pegawai', { method: 'POST', body: formData });\n\t\t\t\tconst d = await res.json();\n\t\t\t\tif (d.success) showToast('Import: ' + d.data.imported + ' pegawai, ' + d.data.skipped + ' skip');\n\t\t\t\telse showToast(d.error || 'Gagal', 'danger');\n\t\t\t}\n\t\t</script>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

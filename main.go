@@ -52,12 +52,6 @@ func main() {
 	r.GET("/register", func(c *gin.Context) {
 		templates.RegisterPage().Render(c.Request.Context(), c.Writer)
 	})
-	r.GET("/pending", func(c *gin.Context) {
-		templates.PendingPage().Render(c.Request.Context(), c.Writer)
-	})
-	r.GET("/rejected", func(c *gin.Context) {
-		templates.RejectedPage().Render(c.Request.Context(), c.Writer)
-	})
 
 	// Public API
 	r.POST("/api/auth/login", authHandler.Login)
