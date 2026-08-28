@@ -6,7 +6,7 @@
    punya komponen navigasi tersebut. */
 
 :root {
-    /* shadcn tokens (light) */
+    /* shadcn tokens (light) — override CDN Vega defaults */
     --primary: #2563eb;
     --primary-foreground: #ffffff;
     --background: #ffffff;
@@ -22,6 +22,14 @@
     --border: #e4e4e7;
     --input: #e4e4e7;
     --ring: #2563eb;
+    /* sidebar tokens — override CDN (sidebar light → blue) */
+    --sidebar: #2563eb;
+    --sidebar-foreground: #ffffff;
+    --sidebar-primary: #2563eb;
+    --sidebar-primary-foreground: #ffffff;
+    --sidebar-accent: #1d4ed8;
+    --sidebar-accent-foreground: #ffffff;
+    --sidebar-border: #3b82f6;
     /* layout */
     --sidebar-width: 180px;
     --marquee-height: 26px;
@@ -42,11 +50,15 @@ body {
     top: var(--marquee-height); left: 0;
     width: var(--sidebar-width);
     height: calc(100vh - var(--marquee-height));
-    background: var(--primary);
-    color: var(--primary-foreground);
+    background: var(--sidebar);
+    color: var(--sidebar-foreground);
     z-index: 1000;
     transition: transform 0.3s ease;
     overflow-y: auto;
+}
+.sidebar nav {
+    background: var(--sidebar) !important;
+    color: var(--sidebar-foreground) !important;
 }
 .sidebar .brand {
     padding: 10px 12px;
@@ -64,13 +76,13 @@ body {
     align-items: center;
     gap: 8px;
     padding: 7px 12px;
-    color: color-mix(in srgb, var(--primary-foreground) 75%, transparent);
+    color: color-mix(in srgb, var(--sidebar-foreground) 75%, transparent);
     text-decoration: none;
     font-size: 0.78rem;
     transition: background 0.15s;
 }
 .sidebar .nav-menu .nav-link:hover,
-.sidebar .nav-menu .nav-link.active { background: color-mix(in srgb, var(--primary-foreground) 12%, transparent); color: var(--primary-foreground); }
+.sidebar .nav-menu .nav-link.active { background: color-mix(in srgb, var(--sidebar-foreground) 12%, transparent); color: var(--sidebar-foreground); }
 .sidebar .nav-menu .nav-link i { font-size: 0.9rem; width: 18px; text-align: center; }
 .sidebar .nav-menu .nav-link.logout-link { color: var(--destructive); }
 

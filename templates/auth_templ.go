@@ -42,7 +42,7 @@ func AuthLayout(title string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - Pusaka Monitor</title><link href=\"https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/basecoat.cdn.min.css\" rel=\"stylesheet\"><link href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css\" rel=\"stylesheet\"><link href=\"/static/css/app.css?v=3\" rel=\"stylesheet\"></head><body class=\"bg-background text-foreground\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - Pusaka Monitor</title><link href=\"https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/basecoat.cdn.min.css\" rel=\"stylesheet\"><link href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css\" rel=\"stylesheet\"><link href=\"/static/css/app.css?v=5\" rel=\"stylesheet\"></head><body class=\"bg-background text-foreground\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
