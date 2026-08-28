@@ -29,7 +29,7 @@ templ ApprovalPage() {
 					} else {
 						pendingDiv.innerHTML = data.data.pending.map(i => `
 							<div class="card mb-3">
-								<section class="card-body">
+								<section class="">
 									<div class="flex justify-between items-start">
 										<div>
 											<h6 class="mb-1">${i.nama}</h6>
@@ -56,12 +56,12 @@ templ ApprovalPage() {
 					} else {
 						recentDiv.innerHTML = data.data.recent.map(i => `
 							<div class="card mb-2">
-								<section class="card-body py-2 flex items-center justify-between">
+								<section class="py-2 flex items-center justify-between">
 									<div>
 										<strong>${i.nama}</strong>
 										<small class="text-muted-foreground ms-2">${i.kabupaten}</small>
 									</div>
-									<span class="badge ${i.status==='approved'?'badge-hadir':'badge-alfa'}">${i.status}</span>
+									<span class="badge ${i.status==='approved'?'data-variant=\"secondary\"':'data-variant=\"destructive\"'}">${i.status}</span>
 								</section>
 							</div>
 						`).join('');

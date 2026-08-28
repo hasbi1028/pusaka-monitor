@@ -26,38 +26,36 @@ templ PegawaiPage() {
 			</div>
 		</div>
 		@BottomNav("pegawai")
-		<!-- Modal (vanilla) -->
-		<div class="modal-overlay" id="pegawaiModal" onclick="if(event.target===this)hideModal()">
-			<div class="modal-box">
-				<div class="modal-header">
-					<span id="modalTitle">Tambah Pegawai</span>
-					<button class="btn" data-variant="ghost" data-size="icon" onclick="hideModal()"><i class="bi bi-x-lg"></i></button>
-				</div>
-				<div class="modal-body">
+		<!-- Modal (Basecoat native dialog) -->
+		<dialog id="pegawaiModal" class="dialog" aria-labelledby="modalTitle" aria-describedby="modalDesc" onclick="if(event.target===this)this.close()">
+			<div class="sm:max-w-sm">
+				<header>
+					<h2 id="modalTitle">Tambah Pegawai</h2>
+					<p id="modalDesc" class="text-muted-foreground">Isi data pegawai dan password Pusaka.</p>
+				</header>
+				<section>
 					<input type="hidden" id="editId"/>
 					<div class="grid gap-2 mb-3">
-						<label class="label">NIP <span class="text-red-600">*</span></label>
+						<label class="label">NIP <span class="text-destructive">*</span></label>
 						<input type="text" class="input" id="nip" placeholder="Nomor Induk Pegawai" required/>
 					</div>
 					<div class="grid gap-2 mb-3">
-						<label class="label">Nama Lengkap <span class="text-red-600">*</span></label>
+						<label class="label">Nama Lengkap <span class="text-destructive">*</span></label>
 						<input type="text" class="input" id="nama" required/>
 					</div>
 					<div class="grid gap-2 mb-1">
 						<label class="label">Password Pusaka</label>
 						<input type="password" class="input" id="password_pusaka" placeholder="Password login Pusaka Kemenag"/>
 					</div>
-				</div>
-				<div class="modal-footer">
-					<button class="btn" data-variant="ghost" onclick="hideModal()">Batal</button>
+				</section>
+				<footer>
+					<button class="btn" data-variant="ghost" onclick="document.getElementById('pegawaiModal').close()">Batal</button>
 					<button class="btn" onclick="savePegawai()">Simpan</button>
-				</div>
+				</footer>
+				<button type="button" class="btn" data-variant="ghost" data-size="icon-sm" aria-label="Tutup" onclick="document.getElementById('pegawaiModal').close()"><i class="bi bi-x-lg"></i></button>
 			</div>
-		</div>
+		</dialog>
 		<script>
-			function showModal() { document.getElementById('pegawaiModal').classList.add('show'); }
-			function hideModal() { document.getElementById('pegawaiModal').classList.remove('show'); }
-
 			async function loadPegawai() {
 				const res = await fetch('/api/pegawai');
 				const data = await res.json();
@@ -68,11 +66,11 @@ templ PegawaiPage() {
 							<td><small class="text-muted-foreground">${p.nip}</small></td>
 							<td>${p.nama}</td>
 							<td class="text-center">
-								<button class="btn" data-variant="outline" onclick="scrapePegawai('${p.nip}')" title="Scrape 1 pegawai"><i class="bi bi-lightning-charge"></i></button>
+								<button class="btn" data-variant="outline" data-size="sm" onclick="scrapePegawai('${p.nip}')" title="Scrape 1 pegawai"><i class="bi bi-lightning-charge"></i></button>
 							</td>
 							<td class="text-center">
-								<button class="btn" data-variant="outline" onclick='editPegawai(${JSON.stringify(p)})'><i class="bi bi-pencil"></i></button>
-								<button class="btn" data-variant="destructive" onclick="deletePegawai('${p.id}')"><i class="bi bi-trash"></i></button>
+								<button class="btn" data-variant="outline" data-size="sm" onclick='editPegawai(${JSON.stringify(p)})'><i class="bi bi-pencil"></i></button>
+								<button class="btn" data-variant="destructive" data-size="sm" onclick="deletePegawai('${p.id}')"><i class="bi bi-trash"></i></button>
 							</td>
 						</tr>
 					`).join('');
@@ -86,7 +84,7 @@ templ PegawaiPage() {
 				document.getElementById('nip').value = '';
 				document.getElementById('nama').value = '';
 				document.getElementById('password_pusaka').value = '';
-				showModal();
+				document.getElementById('pegawaiModal').showModal();
 			}
 			function editPegawai(p) {
 				document.getElementById('modalTitle').textContent = 'Edit Pegawai';
@@ -94,7 +92,7 @@ templ PegawaiPage() {
 				document.getElementById('nip').value = p.nip;
 				document.getElementById('nama').value = p.nama;
 				document.getElementById('password_pusaka').value = '';
-				showModal();
+				document.getElementById('pegawaiModal').showModal();
 			}
 			async function savePegawai() {
 				const id = document.getElementById('editId').value;
@@ -108,7 +106,7 @@ templ PegawaiPage() {
 				const res = await fetch(url, { method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body) });
 				const data = await res.json();
 				if (data.success) {
-					hideModal();
+					document.getElementById('pegawaiModal').close();
 					loadPegawai();
 					showToast('Pegawai berhasil disimpan');
 				}

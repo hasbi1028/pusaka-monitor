@@ -43,7 +43,7 @@ templ DashboardPage(username string) {
 				<!-- Harian -->
 				<div id="harianView">
 					<div class="card mb-2">
-						<section class="card-body py-2">
+						<section class="py-2">
 							<div class="flex items-center gap-2 flex-wrap">
 								<label class="label mb-0 font-semibold">Tanggal:</label>
 								<input type="date" class="input" style="width:auto;" id="datePicker" onchange="loadDashboard()"/>
@@ -52,7 +52,7 @@ templ DashboardPage(username string) {
 						</section>
 					</div>
 					<div class="card">
-						<header class="card-header flex justify-between items-center py-1">
+						<header class="flex justify-between items-center py-1">
 							<span><i class="bi bi-table"></i> Presensi</span>
 							<span class="badge" id="tableCount">0</span>
 						</header>
@@ -68,7 +68,7 @@ templ DashboardPage(username string) {
 				<!-- Bulanan -->
 				<div id="bulananView" style="display:none;">
 					<div class="card mb-2">
-						<section class="card-body py-2">
+						<section class="py-2">
 							<div class="flex items-center gap-2 flex-wrap">
 								<label class="label mb-0 font-semibold">Bulan:</label>
 								<select class="input" style="width:auto;" id="bulanPicker" onchange="loadBulan()">
@@ -92,7 +92,7 @@ templ DashboardPage(username string) {
 					</div>
 					<div id="bulanRekapView">
 						<div class="card mb-2">
-							<section class="card-body py-2">
+							<section class="py-2">
 								<div class="grid grid-cols-3 gap-2 text-center">
 									<div><div class="font-bold" id="sumHari">-</div><div class="text-muted-foreground" style="font-size:0.65rem;">Hari Kerja</div></div>
 									<div><div class="font-bold text-green-600" id="sumRata">-</div><div class="text-muted-foreground" style="font-size:0.65rem;">% Hadir</div></div>
@@ -101,7 +101,7 @@ templ DashboardPage(username string) {
 							</section>
 						</div>
 						<div class="card">
-							<header class="card-header py-1"><i class="bi bi-people"></i> Rekap per Pegawai</header>
+							<header class="py-1"><i class="bi bi-people"></i> Rekap per Pegawai</header>
 							<div class="table-container" style="max-height:50vh; overflow-y:auto;">
 								<table class="table">
 									<thead><tr><th>Nama</th><th class="text-center">Hadir</th><th class="text-center">Telat</th><th class="text-center">Alfa</th><th class="text-center">%</th></tr></thead>
@@ -112,7 +112,7 @@ templ DashboardPage(username string) {
 					</div>
 					<div id="bulanDetailView" style="display:none;">
 						<div class="card">
-							<header class="card-header py-1"><i class="bi bi-list-ul"></i> Detail Harian</header>
+							<header class="py-1"><i class="bi bi-list-ul"></i> Detail Harian</header>
 							<div class="table-container" style="max-height:55vh; overflow-y:auto;">
 								<table class="table">
 									<thead><tr><th>Tanggal</th><th>Nama</th><th class="text-center">Masuk</th><th class="text-center">Pulang</th><th class="text-center">Status</th></tr></thead>
@@ -148,13 +148,13 @@ templ DashboardPage(username string) {
 
 			function statusBadge(s) {
 				switch(s) {
-					case 'Belum Masuk': return 'badge-wait';
-					case 'Belum Pulang': return 'badge-wait';
-					case 'Terlambat': return 'badge-alfa';
-					case 'Telat Ringan': return 'badge-telat';
-					case 'Tepat Waktu': return 'badge-hadir';
-					case 'Hadir': return 'badge-hadir';
-					default: return 'badge-wait';
+					case 'Belum Masuk': return 'secondary';
+					case 'Belum Pulang': return 'secondary';
+					case 'Terlambat': return 'destructive';
+					case 'Telat Ringan': return 'outline';
+					case 'Tepat Waktu': return '';
+					case 'Hadir': return '';
+					default: return 'secondary';
 				}
 			}
 
@@ -181,7 +181,7 @@ templ DashboardPage(username string) {
 							<td>${a.nama}</td>
 							<td class="text-center">${a.jam_masuk || '-'}</td>
 							<td class="text-center">${a.jam_pulang || '-'}</td>
-							<td class="text-center"><span class="badge ${statusBadge(a.status)}">${a.status || (a.jam_masuk ? 'Hadir' : 'Alfa')}</span></td>
+							<td class="text-center"><span class="badge ${statusBadge(a.status) ? 'data-variant='+JSON.stringify(statusBadge(a.status)) : ''}">${a.status || (a.jam_masuk ? 'Hadir' : 'Alfa')}</span></td>
 						</tr>
 					`).join('');
 				}
@@ -248,7 +248,7 @@ templ DashboardPage(username string) {
 						<td>${a.nama}</td>
 						<td class="text-center">${a.jam_masuk || '-'}</td>
 						<td class="text-center">${a.jam_pulang || '-'}</td>
-						<td class="text-center"><span class="badge ${statusBadge(a.status)}">${a.status || '-'}</span></td>
+						<td class="text-center"><span class="badge ${statusBadge(a.status) ? 'data-variant='+JSON.stringify(statusBadge(a.status)) : ''}">${a.status || '-'}</span></td>
 					</tr>
 				`).join('');
 			}

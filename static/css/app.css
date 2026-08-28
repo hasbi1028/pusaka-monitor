@@ -103,34 +103,8 @@ body {
 }
 .table td { padding: 6px 8px; vertical-align: middle; }
 
-/* ===== STATUS BADGE (pure shadcn tokens) ===== */
-.badge-hadir { background: var(--primary); color: var(--primary-foreground); }
-.badge-telat { background: hsl(45 93% 47%); color: var(--primary-foreground); }
-.badge-alfa  { background: var(--destructive); color: var(--destructive-foreground); }
-.badge-wait  { background: var(--secondary); color: var(--secondary-foreground); }
-
-/* ===== BUTTONS spacing helper ===== */
+/* ===== STATUS BADGE — pakai bawaan Basecoat (data-variant) ===== */
 .btn-sm-i { padding: 3px 8px; font-size: 0.72rem; }
-
-/* ===== MODAL (vanilla) ===== */
-.modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(0,0,0,0.5);
-    display: none;
-    align-items: center; justify-content: center;
-    z-index: 2000; padding: 16px;
-}
-.modal-overlay.show { display: flex; }
-.modal-box {
-    background: var(--card); border-radius: 10px;
-    width: 100%; max-width: 420px;
-    max-height: 90vh; overflow-y: auto;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
-    border: 1px solid var(--border);
-}
-.modal-header { padding: 12px 16px; border-bottom: 1px solid var(--border); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
-.modal-body { padding: 12px 16px; }
-.modal-footer { padding: 10px 16px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
 
 /* ===== AUTH ===== */
 .auth-container {

@@ -10,18 +10,8 @@ function toggleSidebar() {
 
 // Logout
 async function logout() {
-    await fetch('/api/auth/logout', { method: 'POST' });
-    window.location.href = '/login';
-}
-
-// Get status badge class (Basecoat custom)
-function getStatusBadge(status) {
-    switch(status) {
-        case 'Hadir': return 'badge-hadir';
-        case 'Terlambat': return 'badge-alfa';
-        case 'Telat Ringan': return 'badge-telat';
-        default: return 'badge-wait';
-    }
+	await fetch('/api/auth/logout', { method: 'POST' });
+	window.location.href = '/login';
 }
 
 // Show loading on button

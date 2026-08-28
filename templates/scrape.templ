@@ -8,7 +8,7 @@ templ ScrapePage() {
 			<div class="content">
 				<!-- Action Button -->
 				<div class="card mb-2">
-					<section class="card-body py-2">
+					<section class="py-2">
 						<button class="btn w-full mb-2" onclick="createJobs('all')">
 							<i class="bi bi-lightning-charge-fill"></i> Scrape Semua (Belum Lengkap)
 						</button>
@@ -52,11 +52,11 @@ templ ScrapePage() {
 				</div>
 				<!-- Jobs Table -->
 				<div class="card">
-					<header class="card-header flex justify-between items-center">
+					<header class="flex justify-between items-center">
 						<span><i class="bi bi-list-check"></i> Antrian Job</span>
 						<span class="badge" id="jobCount">0</span>
 					</header>
-					<section class="card-body py-2">
+					<section class="py-2">
 						<div class="flex gap-2 mb-2">
 							<input type="text" class="input" id="jobSearch" placeholder="Cari nama..." oninput="applyJobFilter()"/>
 							<select class="input" style="width:auto;" id="jobStatusFilter" onchange="applyJobFilter()">
@@ -119,11 +119,11 @@ templ ScrapePage() {
 					const created = j.created_at ? new Date(j.created_at).toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit',second:'2-digit'}) : '-';
 					const completed = j.completed_at ? new Date(j.completed_at).toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit',second:'2-digit'}) : '';
 					const waktu = completed ? `${created}<br><small class="text-green-600">✓ ${completed}</small>` : `<span class="text-yellow-600">${created}</span>`;
-					const badge = j.status==='done' ? 'badge-hadir' : j.status==='failed' ? 'badge-alfa' : j.status==='running' ? 'badge-wait' : j.status==='cancelled' ? 'badge-wait' : 'badge-wait';
+					const badge = j.status==='done' ? '' : j.status==='failed' ? 'data-variant="destructive"' : j.status==='running' ? 'data-variant="secondary"' : j.status==='cancelled' ? 'data-variant="outline"' : 'data-variant="secondary"';
 					return `
 						<tr>
 							<td>${j.employee_name}</td>
-							<td><span class="badge ${badge}">${j.status}</span></td>
+							<td><span class="badge" ${badge}>${j.status}</span></td>
 							<td><small>${waktu}</small></td>
 							<td><small class="text-red-600">${j.error || ''}</small></td>
 							<td>${btn}</td>
