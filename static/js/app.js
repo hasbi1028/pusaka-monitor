@@ -1,4 +1,4 @@
-// Pusaka Monitor - Shared JavaScript
+// Pusaka Monitor - Shared JavaScript (Basecoat UI)
 
 // Toggle Sidebar (Mobile)
 function toggleSidebar() {
@@ -14,77 +14,47 @@ async function logout() {
     window.location.href = '/login';
 }
 
-// Load Dashboard
-async function loadDashboard() {
-    const tanggal = document.getElementById('datePicker')?.value;
-    if (!tanggal) return;
-    
-    try {
-        const res = await fetch(`/api/dashboard?tanggal=${tanggal}`);
-        const data = await res.json();
-        if (data.success) {
-            document.getElementById('total').textContent = data.data.rekap.total || 0;
-            document.getElementById('hadir').textContent = data.data.rekap.hadir || 0;
-            document.getElementById('telat').textContent = data.data.rekap.terlambat || 0;
-            document.getElementById('alfa').textContent = data.data.rekap.tidak_hadir || 0;
-
-            const tbody = document.getElementById('absensiTable');
-            const countBadge = document.getElementById('tableCount');
-            
-            if (data.data.absensi.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4"><i class="bi bi-inbox" style="font-size:2rem;"></i><br>Belum ada data presensi</td></tr>';
-                countBadge.textContent = '0';
-            } else {
-                tbody.innerHTML = data.data.absensi.map(a => `
-                    <tr>
-                        <td>
-                            <div class="fw-semibold">${a.nama}</div>
-                            <small class="text-muted">${a.nip}</small>
-                        </td>
-                        <td class="text-center">${a.jam_masuk || '-'}</td>
-                        <td class="text-center">${a.jam_pulang || '-'}</td>
-                        <td class="text-center">
-                            <span class="badge ${getStatusBadge(a.status)}">${a.status || '-'}</span>
-                        </td>
-                    </tr>
-                `).join('');
-                countBadge.textContent = data.data.absensi.length;
-            }
-        }
-    } catch (err) {
-        console.error('Error loading dashboard:', err);
-    }
-}
-
-// Get status badge class
+// Get status badge class (Basecoat custom)
 function getStatusBadge(status) {
     switch(status) {
-        case 'Hadir': return 'bg-success';
-        case 'Terlambat': return 'bg-danger';
-        case 'Telat Ringan': return 'bg-warning text-dark';
-        default: return 'bg-secondary';
+        case 'Hadir': return 'badge-hadir';
+        case 'Terlambat': return 'badge-alfa';
+        case 'Telat Ringan': return 'badge-telat';
+        default: return 'badge-wait';
     }
 }
 
-// Show loading
+// Show loading on button
 function showLoading(btn) {
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Memproses...';
+    btn.dataset.original = btn.innerHTML;
+    btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Memproses...';
 }
 
 // Hide loading
-function hideLoading(btn, text) {
+function hideLoading(btn) {
     btn.disabled = false;
-    btn.innerHTML = text;
+    if (btn.dataset.original) btn.innerHTML = btn.dataset.original;
 }
 
-// Show toast notification
+// Show toast notification (Basecoat alert, fixed top-right)
 function showToast(message, type = 'success') {
+    const variant = type === 'danger' ? 'destructive' : type === 'warning' ? 'secondary' : 'default';
     const toast = document.createElement('div');
-    toast.className = `alert alert-${type} position-fixed top-0 end-0 m-3`;
+    toast.className = 'alert';
+    if (variant !== 'default') toast.setAttribute('data-variant', variant);
+    toast.style.position = 'fixed';
+    toast.style.top = '36px';
+    toast.style.right = '12px';
     toast.style.zIndex = '9999';
-    toast.style.minWidth = '300px';
-    toast.textContent = message;
+    toast.style.minWidth = '280px';
+    toast.style.maxWidth = '90vw';
+    toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+    toast.innerHTML = `<section>${message}</section>`;
     document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
