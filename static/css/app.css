@@ -1,10 +1,28 @@
 /* Pusaka Monitor - Pure shadcn/Basecoat Theme
-   SEMUA warna pakai CSS variables shadcn (--primary, --foreground, dll)
-   dari Basecoat CDN. TIDAK ADA hex manual.
-   Layout mobile (sidebar/topbar/bottom-nav/marquee) tetap custom
-   karena Basecoat tidak punya komponen navigasi tersebut. */
+   SEMUA warna pakai CSS variables shadcn (--primary, --foreground, dll).
+   Token didefinisikan di sini (fallback) agar tidak bergantung
+   pada nama variable di CDN. Layout mobile (sidebar/topbar/
+   bottom-nav/marquee) tetap custom karena Basecoat tidak
+   punya komponen navigasi tersebut. */
 
 :root {
+    /* shadcn tokens (light) */
+    --primary: #2563eb;
+    --primary-foreground: #ffffff;
+    --background: #ffffff;
+    --foreground: #0a0a0a;
+    --card: #ffffff;
+    --card-foreground: #0a0a0a;
+    --muted: #f4f4f5;
+    --muted-foreground: #71717a;
+    --secondary: #f4f4f5;
+    --secondary-foreground: #0a0a0a;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --border: #e4e4e7;
+    --input: #e4e4e7;
+    --ring: #2563eb;
+    /* layout */
     --sidebar-width: 180px;
     --marquee-height: 26px;
 }
