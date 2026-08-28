@@ -13,31 +13,31 @@ templ DashboardPage(username string) {
 						<div class="label">Total</div>
 					</div>
 					<div class="stat-card hadir">
-						<div class="number text-green-600" id="hadir">-</div>
+						<div class="number text-primary" id="hadir">-</div>
 						<div class="label">Hadir</div>
 					</div>
 					<div class="stat-card telat">
 						<div class="number text-yellow-600" id="telat">-</div>
 						<div class="label">Telat</div>
 					</div>
-					<div class="stat-card" style="border-color:#fd7e14;">
-						<div class="number" id="belumMasuk" style="color:#fd7e14;">-</div>
+					<div class="stat-card warn">
+						<div class="number text-orange-600" id="belumMasuk">-</div>
 						<div class="label">Blm Masuk</div>
 					</div>
-					<div class="stat-card" style="border-color:#0dcaf0;">
-						<div class="number" id="belumPulang" style="color:#0dcaf0;">-</div>
+					<div class="stat-card info">
+						<div class="number text-cyan-600" id="belumPulang">-</div>
 						<div class="label">Blm Pulang</div>
 					</div>
 					<div class="stat-card alfa">
-						<div class="number text-red-600" id="alfa">-</div>
+						<div class="number text-destructive" id="alfa">-</div>
 						<div class="label">Alfa</div>
 					</div>
 				</div>
 
 				<!-- Tab Harian / Bulanan -->
 				<div class="flex gap-2 mb-2" id="modeTabs">
-					<button class="btn btn-sm" data-size="sm" id="tabHarian" onclick="setMode('harian')">Harian</button>
-					<button class="btn btn-sm" data-size="sm" id="tabBulanan" onclick="setMode('bulanan')">Bulanan</button>
+					<button class="btn" data-size="sm" id="tabHarian" onclick="setMode('harian')">Harian</button>
+					<button class="btn" data-size="sm" id="tabBulanan" onclick="setMode('bulanan')">Bulanan</button>
 				</div>
 
 				<!-- Harian -->
@@ -47,7 +47,7 @@ templ DashboardPage(username string) {
 							<div class="flex items-center gap-2 flex-wrap">
 								<label class="label mb-0 font-semibold">Tanggal:</label>
 								<input type="date" class="input" style="width:auto;" id="datePicker" onchange="loadDashboard()"/>
-								<button class="btn btn-sm" data-size="sm" onclick="loadDashboard()"><i class="bi bi-search"></i></button>
+								<button class="btn" data-size="sm" onclick="loadDashboard()"><i class="bi bi-search"></i></button>
 							</div>
 						</section>
 					</div>
@@ -81,14 +81,14 @@ templ DashboardPage(username string) {
 									<option value="2026">2026</option>
 									<option value="2025">2025</option>
 								</select>
-								<button class="btn btn-sm" data-variant="outline" data-size="sm" onclick="exportCSV()"><i class="bi bi-download"></i> CSV</button>
+								<button class="btn" data-variant="outline" data-size="sm" onclick="exportCSV()"><i class="bi bi-download"></i> CSV</button>
 							</div>
 						</section>
 					</div>
 					<!-- Sub-tab bulanan -->
 					<div class="flex gap-2 mb-2" id="bulanTabs">
-						<button class="btn btn-sm" data-size="sm" id="subRekap" onclick="setBulanMode('rekap')">Rekap Pegawai</button>
-						<button class="btn btn-sm" data-size="sm" id="subDetail" onclick="setBulanMode('detail')">Detail Harian</button>
+						<button class="btn" data-size="sm" id="subRekap" onclick="setBulanMode('rekap')">Rekap Pegawai</button>
+						<button class="btn" data-size="sm" id="subDetail" onclick="setBulanMode('detail')">Detail Harian</button>
 					</div>
 					<div id="bulanRekapView">
 						<div class="card mb-2">

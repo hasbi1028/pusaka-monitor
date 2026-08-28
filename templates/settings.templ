@@ -40,7 +40,7 @@ templ SettingsPage(username string, role string) {
 							<label class="label font-semibold">Jumlah Worker Paralel</label>
 							<div class="flex gap-2">
 								<input type="number" min="1" max="100" class="input" id="concInput" value="8"/>
-								<button class="btn btn-sm" data-variant="outline" onclick="saveConc()">Simpan</button>
+								<button class="btn" data-variant="outline" onclick="saveConc()">Simpan</button>
 							</div>
 							<small class="text-muted-foreground">Makin tinggi makin cepat, tapi hati-hati rate-limit Pusaka (max 60 req/jam/akun).</small>
 						</section>
@@ -50,7 +50,7 @@ templ SettingsPage(username string, role string) {
 						<header class="card-header"><i class="bi bi-upload"></i> Import Pegawai</header>
 						<section class="card-body">
 							<input type="file" class="input mb-2" id="pegawaiFile" accept=".json"/>
-							<button class="btn btn-sm w-full" onclick="importPegawai()">
+							<button class="btn w-full" onclick="importPegawai()">
 								<i class="bi bi-cloud-upload"></i> Import dari JSON
 							</button>
 						</section>

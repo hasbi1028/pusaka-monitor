@@ -98,7 +98,7 @@ templ UsersPage() {
 						<td><span class="badge ${u.role==='superadmin'?'badge-alfa':'badge-hadir'}">${u.role}</span></td>
 						<td><small class="text-muted-foreground">${u.instansi_nama || '-'}</small></td>
 						<td class="text-end">
-							<button class="btn btn-sm" data-variant="outline" onclick="resetUser('${u.id}','${u.username}')"><i class="bi bi-key"></i> Reset</button>
+							<button class="btn" data-variant="outline" onclick="resetUser('${u.id}','${u.username}')"><i class="bi bi-key"></i> Reset</button>
 						</td>
 					</tr>
 				`).join('');

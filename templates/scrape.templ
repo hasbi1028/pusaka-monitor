@@ -13,10 +13,10 @@ templ ScrapePage() {
 							<i class="bi bi-lightning-charge-fill"></i> Scrape Semua (Belum Lengkap)
 						</button>
 						<div class="flex gap-2">
-							<button class="btn btn-sm" data-variant="secondary" style="flex:1;" onclick="createJobs('belum_masuk')">
+							<button class="btn" data-variant="secondary" style="flex:1;" onclick="createJobs('belum_masuk')">
 								<i class="bi bi-clock-history"></i> Belum Masuk
 							</button>
-							<button class="btn btn-sm" data-variant="outline" style="flex:1;" onclick="createJobs('belum_pulang')">
+							<button class="btn" data-variant="outline" style="flex:1;" onclick="createJobs('belum_pulang')">
 								<i class="bi bi-clock"></i> Belum Pulang
 							</button>
 						</div>
@@ -28,8 +28,8 @@ templ ScrapePage() {
 						<div class="number" id="pending">0</div>
 						<div class="label">Pending</div>
 					</div>
-					<div class="stat-card" style="border-color:#0d6efd;">
-						<div class="number text-blue-600" id="running">0</div>
+					<div class="stat-card info">
+						<div class="number text-cyan-600" id="running">0</div>
 						<div class="label">Running</div>
 					</div>
 					<div class="stat-card hadir">
@@ -43,10 +43,10 @@ templ ScrapePage() {
 				</div>
 				<!-- Retry + Cancel All -->
 				<div class="flex gap-2 mb-2">
-					<button class="btn btn-sm" data-variant="outline" style="flex:1;" onclick="retryFailed()">
+					<button class="btn" data-variant="outline" style="flex:1;" onclick="retryFailed()">
 						<i class="bi bi-arrow-repeat"></i> Retry Gagal
 					</button>
-					<button class="btn btn-sm" data-variant="destructive" style="flex:1;" onclick="cancelAll()">
+					<button class="btn" data-variant="destructive" style="flex:1;" onclick="cancelAll()">
 						<i class="bi bi-x-circle"></i> Cancel All
 					</button>
 				</div>
@@ -114,7 +114,7 @@ templ ScrapePage() {
 				tbody.innerHTML = filtered.map(j => {
 					const cancellable = (j.status === 'pending' || j.status === 'running');
 					const btn = cancellable
-						? `<button class="btn btn-sm" data-variant="destructive" onclick="cancelOne('${j.id}')"><i class="bi bi-x"></i></button>`
+						? `<button class="btn" data-variant="destructive" onclick="cancelOne('${j.id}')"><i class="bi bi-x"></i></button>`
 						: '';
 					const created = j.created_at ? new Date(j.created_at).toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit',second:'2-digit'}) : '-';
 					const completed = j.completed_at ? new Date(j.completed_at).toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit',second:'2-digit'}) : '';

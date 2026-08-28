@@ -68,11 +68,11 @@ templ PegawaiPage() {
 							<td><small class="text-muted-foreground">${p.nip}</small></td>
 							<td>${p.nama}</td>
 							<td class="text-center">
-								<button class="btn btn-sm" data-variant="outline" onclick="scrapePegawai('${p.nip}')" title="Scrape 1 pegawai"><i class="bi bi-lightning-charge"></i></button>
+								<button class="btn" data-variant="outline" onclick="scrapePegawai('${p.nip}')" title="Scrape 1 pegawai"><i class="bi bi-lightning-charge"></i></button>
 							</td>
 							<td class="text-center">
-								<button class="btn btn-sm" data-variant="outline" onclick='editPegawai(${JSON.stringify(p)})'><i class="bi bi-pencil"></i></button>
-								<button class="btn btn-sm" data-variant="destructive" onclick="deletePegawai('${p.id}')"><i class="bi bi-trash"></i></button>
+								<button class="btn" data-variant="outline" onclick='editPegawai(${JSON.stringify(p)})'><i class="bi bi-pencil"></i></button>
+								<button class="btn" data-variant="destructive" onclick="deletePegawai('${p.id}')"><i class="bi bi-trash"></i></button>
 							</td>
 						</tr>
 					`).join('');
