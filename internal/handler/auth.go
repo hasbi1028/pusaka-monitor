@@ -33,6 +33,11 @@ type RegisterRequest struct {
 	Password     string `json:"password" binding:"required"`
 }
 
+// isHTTPS deteksi apakah request via HTTPS
+func isHTTPS(c *gin.Context) bool {
+	return c.Request.TLS != nil || c.GetHeader("X-Forwarded-Proto") == "https"
+}
+
 // POST /api/auth/login
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
@@ -89,8 +94,9 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	now := time.Now()
 	h.DB.Model(&user).Update("last_login", &now)
 
-	// Set cookie
-	c.SetCookie("session", token, 12*3600, "/", "", false, true)
+	// Set cookie (secure jika HTTPS)
+	secure := isHTTPS(c)
+	c.SetCookie("session", token, 12*3600, "/", "", secure, true)
 
 	c.JSON(http.StatusOK, models.ApiResponse{
 		Success: true,
@@ -148,13 +154,13 @@ func (h *AuthHandler) Register(c *gin.Context) {
 	}
 
 	// Log approval
-	log := models.ApprovalLog{
+	logEntry := models.ApprovalLog{
 		ID:         uuid.New().String(),
 		InstansiID: instansiID,
 		Action:     "registered",
 		Actor:      "system",
 	}
-	h.DB.Create(&log)
+	h.DB.Create(&logEntry)
 
 	c.JSON(http.StatusCreated, models.ApiResponse{
 		Success: true,
@@ -169,7 +175,8 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 	if token != "" {
 		h.DB.Where("token = ?", token).Delete(&models.Session{})
 	}
-	c.SetCookie("session", "", -1, "/", "", false, true)
+	secure := isHTTPS(c)
+	c.SetCookie("session", "", -1, "/", "", secure, true)
 	c.JSON(http.StatusOK, models.ApiResponse{Success: true})
 }
 

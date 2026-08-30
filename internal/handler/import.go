@@ -5,34 +5,51 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 
-	"github.com/hasbiawal/pusaka-monitor/internal/database"
+	"github.com/hasbiawal/pusaka-monitor/internal/crypto"
 	"github.com/hasbiawal/pusaka-monitor/internal/models"
 )
 
 // PegawaiImport — struktur dari pegawai-backup-*.json
 type PegawaiImport struct {
-	NIP    string `json:"nip"`
-	Nama   string `json:"nama"`
+	NIP      string `json:"nip"`
+	Nama     string `json:"nama"`
 	Password string `json:"password"`
-	Aktif  bool   `json:"aktif"`
+	Aktif    bool   `json:"aktif"`
 }
 
 type ImportFile struct {
-	Format    string          `json:"format"`
-	ExportedAt string         `json:"exportedAt"`
-	Total     int             `json:"total"`
-	Pegawai   []PegawaiImport `json:"pegawai"`
+	Format     string          `json:"format"`
+	ExportedAt string          `json:"exportedAt"`
+	Total      int             `json:"total"`
+	Pegawai    []PegawaiImport `json:"pegawai"`
 }
 
 // POST /api/admin/import-pegawai
 // Body: JSON file (multipart "file") ATAU raw JSON
-// Buat instansi MTsN 2 Kolut jika belum ada, lalu import 35 pegawai.
+// Import pegawai ke instansi user yang sedang login.
 func (h *PegawaiHandler) ImportPegawai(c *gin.Context) {
+	instansiID, _ := c.Get("instansi_id")
+	role, _ := c.Get("role")
+	instStr, _ := instansiID.(string)
+
+	// Superadmin tanpa instansi → cari instansi approved pertama
+	if role == "superadmin" && (instStr == "" || instStr == "global") {
+		var inst models.Instansi
+		if h.DB.Where("status = 'approved'").First(&inst).Error == nil {
+			instStr = inst.ID
+		} else {
+			c.JSON(http.StatusBadRequest, models.ApiResponse{
+				Success: false,
+				Error:   "Tidak ada instansi approved. Buat instansi dulu via Register.",
+			})
+			return
+		}
+	}
+
 	var raw []byte
 	var err error
 
@@ -58,51 +75,30 @@ func (h *PegawaiHandler) ImportPegawai(c *gin.Context) {
 		return
 	}
 
-	// Cari/buat instansi MTsN 2 Kolut
-	var instansi models.Instansi
-	if err := h.DB.Where("nama = ?", "MTsN 2 Kolaka Utara").First(&instansi).Error; err != nil {
-		instansi = models.Instansi{
-			ID:          uuid.New().String(),
-			Nama:        "MTsN 2 Kolaka Utara",
-			JnsInstansi: "mtsn",
-			Kabupaten:   "Kolaka Utara",
-			Provinsi:    "Sulawesi Tenggara",
-			Alamat:      "Jl. Lalume No. 42 Kel. Olo-Oloho",
-			Telepon:     "",
-			Email:       "mtsn.pakue@gmail.com",
-			Aktif:       true,
-			Status:      "approved",
-			ApprovedAt:  &[]time.Time{time.Now()}[0],
-		}
-		h.DB.Create(&instansi)
-
-		// Buat user admin untuk instansi ini
-		hash, _ := database.HashPassword("admin123")
-		h.DB.Create(&models.User{
-			ID:           uuid.New().String(),
-			InstansiID:   instansi.ID,
-			Username:     "mtsn2kolut",
-			PasswordHash: hash,
-			Role:         "admin",
-			Aktif:        true,
-		})
-	}
-
-	// Import pegawai (upsert by NIP)
+	// Import pegawai ke instansi user
 	imported := 0
 	skipped := 0
 	for _, p := range imp.Pegawai {
 		var existing models.Pegawai
-		if h.DB.Where("n_ip = ? AND instansi_id = ?", p.NIP, instansi.ID).First(&existing).Error == nil {
+		if h.DB.Where("n_ip = ? AND instansi_id = ?", p.NIP, instStr).First(&existing).Error == nil {
 			skipped++
 			continue
 		}
+
+		// Encrypt password sebelum simpan
+		pwd := p.Password
+		if pwd != "" {
+			if encrypted, err := crypto.Encrypt(pwd); err == nil {
+				pwd = encrypted
+			}
+		}
+
 		err := h.DB.Create(&models.Pegawai{
 			ID:             uuid.New().String(),
-			InstansiID:     instansi.ID,
+			InstansiID:     instStr,
 			NIP:            p.NIP,
 			Nama:           p.Nama,
-			PasswordPusaka: p.Password,
+			PasswordPusaka: pwd,
 			Aktif:          p.Aktif,
 		}).Error
 		if err == nil {
@@ -114,7 +110,7 @@ func (h *PegawaiHandler) ImportPegawai(c *gin.Context) {
 		Success: true,
 		Message: "Import selesai",
 		Data: gin.H{
-			"instansi_id": instansi.ID,
+			"instansi_id": instStr,
 			"imported":    imported,
 			"skipped":     skipped,
 			"total_file":  len(imp.Pegawai),

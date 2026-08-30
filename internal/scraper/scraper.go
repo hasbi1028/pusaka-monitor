@@ -61,14 +61,11 @@ func (c *PusakaClient) ScrapeToday() ScrapeResult {
 	for _, r := range riwayat {
 		iso, ok := parseTanggalIndo(r.Tgl)
 		if ok && iso == tglISO {
-			// Tentukan status (reference + request user)
-			status := determineStatus(r.JamMsk, r.JamPlg)
 			return ScrapeResult{
 				Success:   true,
 				JamMasuk:  r.JamMsk,
 				JamPulang: r.JamPlg,
 				Tanggal:   tglISO,
-				Status:    status,
 				Source:    "http-api",
 			}
 		}
@@ -77,8 +74,9 @@ func (c *PusakaClient) ScrapeToday() ScrapeResult {
 	return ScrapeResult{Success: false, Tanggal: tglISO, Source: "http-api", Error: "Data hari ini tidak ditemukan"}
 }
 
-// determineStatus — logic status presensi (reference + Belum Masuk/Pulang)
-func determineStatus(jamMasuk, jamPulang string) string {
+// DetermineStatus — logic status presensi berdasarkan jam masuk instansi
+// jamMasukStd: "07:30", toleransi: 15 menit, jamPulangStd: "16:00"
+func DetermineStatus(jamMasuk, jamPulang, jamMasukStd string, toleransi int) string {
 	empty := func(s string) bool { return s == "" || s == "-" }
 	if empty(jamMasuk) {
 		return "Belum Masuk"
@@ -86,14 +84,56 @@ func determineStatus(jamMasuk, jamPulang string) string {
 	if empty(jamPulang) {
 		return "Belum Pulang"
 	}
-	// Keduanya ada → banding jam masuk dengan 07:30 / 07:45 (reference)
+	// Keduanya ada → banding jam masuk dengan standar
 	masuk := strings.ReplaceAll(jamMasuk, " ", "")
 	masuk = strings.ReplaceAll(masuk, "WITA", "")
-	masuk = masuk[:5] // "06:43"
-	if masuk <= "07:30" {
+	if len(masuk) >= 5 {
+		masuk = masuk[:5] // "06:43"
+	}
+
+	// Hitung batas telat ringan = jamMasukStd + toleransi menit
+	batasTelat := addMinutes(jamMasukStd, toleransi)
+
+	if masuk <= jamMasukStd {
 		return "Tepat Waktu"
-	} else if masuk <= "07:45" {
+	} else if masuk <= batasTelat {
 		return "Telat Ringan"
 	}
 	return "Terlambat"
+}
+
+// addMinutes — "07:30" + 15 → "07:45"
+func addMinutes(jamStr string, menit int) string {
+	parts := strings.Split(jamStr, ":")
+	if len(parts) != 2 {
+		return jamStr
+	}
+	h := parseInt(parts[0])
+	m := parseInt(parts[1])
+	m += menit
+	for m >= 60 {
+		h++
+		m -= 60
+	}
+	for m < 0 {
+		h--
+		m += 60
+	}
+	if h > 23 {
+		h = 23
+	}
+	if h < 0 {
+		h = 0
+	}
+	return fmt.Sprintf("%02d:%02d", h, m)
+}
+
+func parseInt(s string) int {
+	n := 0
+	for _, c := range s {
+		if c >= '0' && c <= '9' {
+			n = n*10 + int(c-'0')
+		}
+	}
+	return n
 }

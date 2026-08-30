@@ -16,68 +16,134 @@ func namaBulan(i int) string {
 
 templ Layout(title string, username string, role string) {
 	<!DOCTYPE html>
-	<html lang="id" data-bs-theme="light">
+	<html lang="id" class="h-full bg-gray-50">
 	<head>
 		<meta charset="UTF-8"/>
 		<meta name="viewport" content="width=device-width, initial-scale=1"/>
 		<title>{ title } - Pusaka Monitor</title>
-		<link href="https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/basecoat.cdn.min.css" rel="stylesheet"/>
-		<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
-		<link href="/static/css/app.css?v=5" rel="stylesheet"/>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+		<link href="/static/css/app.css" rel="stylesheet"/>
 	</head>
-	<body class="bg-background text-foreground">
-		<div class="marquee-bar">
-			<div class="marquee-content">
-				<i class="bi bi-info-circle"></i> Aplikasi ini <strong>HANYA membaca</strong> riwayat presensi dari Pusaka Kemenag &mdash; tidak melakukan, mengubah, atau membuat data absensi fiktif/palsu. &nbsp;&nbsp;&bull;&nbsp;&nbsp; Data diambil secara otomatis untuk rekap kehadiran &nbsp;&nbsp;&bull;&nbsp;&nbsp; Pusaka Monitor v1.0
-			</div>
-		</div>
+	<body class="h-full">
 		{ children... }
-		<footer class="app-disclaimer">
-			<i class="bi bi-info-circle"></i>
-			Aplikasi ini <strong>HANYA membaca</strong> riwayat presensi dari Pusaka Kemenag.
-			Tidak melakukan, mengubah, atau membuat data absensi fiktif/palsu.
-		</footer>
-		<script src="https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/js/basecoat.min.js" defer></script>
+		<!-- Toast container -->
+		<div id="toast-container" class="fixed top-4 right-4 z-[9999] flex flex-col gap-2 max-w-xs"></div>
+		<script src="https://cdn.jsdelivr.net/npm/flowbite@3.0.0/dist/flowbite.min.js"></script>
 		<script src="/static/js/app.js"></script>
 	</body>
 	</html>
 }
 
 templ Sidebar(activePage string) {
-	<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-	<aside class="sidebar" id="sidebar">
-		<div class="brand">
-			<i class="bi bi-calendar-check"></i>
-			<span>Pusaka Monitor</span>
+	<!-- Backdrop (mobile) -->
+	<div id="sidebar-backdrop" class="hidden fixed inset-0 bg-black/50 z-40 lg:hidden" onclick="closeDrawer()"></div>
+	<!-- Sidebar Drawer (mobile) -->
+	<aside id="sidebar-drawer" class="fixed top-0 left-0 z-50 h-full w-64 bg-white border-r border-gray-200 transform -translate-x-full transition-transform lg:hidden">
+		<div class="flex items-center justify-between p-4 border-b border-gray-200">
+			<div class="flex items-center gap-2">
+				<i class="fa-solid fa-shield-halved text-blue-600 text-lg"></i>
+				<div>
+					<div class="text-sm font-bold text-gray-900">Pusaka Monitor</div>
+					<div class="text-[10px] text-gray-400">Sistem Monitoring</div>
+				</div>
+			</div>
+			<button onclick="closeDrawer()" class="p-1 rounded hover:bg-gray-100">
+				<i class="fa-solid fa-xmark text-gray-500"></i>
+			</button>
 		</div>
-		<nav class="nav-menu">
-			<a href="/" class={ "nav-link", activePage == "dashboard" }><i class="bi bi-house-door"></i> Beranda</a>
-			<a href="/pegawai" class={ "nav-link", activePage == "pegawai" }><i class="bi bi-people"></i> Pegawai</a>
-			<a href="/scrape" class={ "nav-link", activePage == "scrape" }><i class="bi bi-arrow-repeat"></i> Scrape</a>
-			<a href="/profil" class={ "nav-link", activePage == "profil" }><i class="bi bi-person-circle"></i> Profil</a>
-			<a href="/settings" class={ "nav-link", activePage == "settings" }><i class="bi bi-gear"></i> Pengaturan</a>
-			<a href="/superadmin/users" class={ "nav-link", activePage == "users" }><i class="bi bi-people-fill"></i> User Mgmt</a>
-			<a href="#" onclick="logout()" class="nav-link logout-link"><i class="bi bi-box-arrow-right"></i> Keluar</a>
+		<nav class="p-3 space-y-1">
+			@sidebarLinks(activePage)
 		</nav>
+	</aside>
+	<!-- Sidebar Desktop (fixed) -->
+	<aside class="hidden lg:flex lg:flex-col lg:w-56 lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 bg-white border-r border-gray-200">
+		<div class="flex items-center gap-2 p-4 border-b border-gray-200">
+			<i class="fa-solid fa-shield-halved text-blue-600 text-xl"></i>
+			<div>
+				<div class="text-sm font-bold text-gray-900">Pusaka Monitor</div>
+				<div class="text-[10px] text-gray-400">Monitoring Kehadiran</div>
+			</div>
+		</div>
+		<nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+			@sidebarLinks(activePage)
+		</nav>
+		<div class="p-3 border-t border-gray-200 text-center text-[10px] text-gray-400">
+			v1.0 · Pusaka Kemenag
+		</div>
 	</aside>
 }
 
-templ Topbar(title string) {
-	<header class="topbar">
-		<div class="flex items-center gap-2">
-			<button class="btn" data-variant="ghost" data-size="icon" onclick="toggleSidebar()">
-				<i class="bi bi-list"></i>
+templ sidebarLinks(activePage string) {
+	<a href="/" class={ "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors", templ.KV("bg-blue-50 text-blue-700", activePage == "dashboard"), templ.KV("text-gray-600 hover:bg-gray-100 hover:text-gray-900", activePage != "dashboard") }>
+		<i class="fa-solid fa-house w-5 text-center text-xs"></i>
+		<span>Beranda</span>
+	</a>
+	<a href="/pegawai" class={ "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors", templ.KV("bg-blue-50 text-blue-700", activePage == "pegawai"), templ.KV("text-gray-600 hover:bg-gray-100 hover:text-gray-900", activePage != "pegawai") }>
+		<i class="fa-solid fa-users w-5 text-center text-xs"></i>
+		<span>Pegawai</span>
+	</a>
+	<a href="/scrape" class={ "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors", templ.KV("bg-blue-50 text-blue-700", activePage == "scrape"), templ.KV("text-gray-600 hover:bg-gray-100 hover:text-gray-900", activePage != "scrape") }>
+		<i class="fa-solid fa-rotate w-5 text-center text-xs"></i>
+		<span>Scrape</span>
+	</a>
+	<a href="/settings" class={ "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors", templ.KV("bg-blue-50 text-blue-700", activePage == "settings"), templ.KV("text-gray-600 hover:bg-gray-100 hover:text-gray-900", activePage != "settings") }>
+		<i class="fa-solid fa-gear w-5 text-center text-xs"></i>
+		<span>Pengaturan</span>
+	</a>
+	<a href="/superadmin/users" class={ "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors", templ.KV("bg-blue-50 text-blue-700", activePage == "users"), templ.KV("text-gray-600 hover:bg-gray-100 hover:text-gray-900", activePage != "users") }>
+		<i class="fa-solid fa-user-shield w-5 text-center text-xs"></i>
+		<span>User Mgmt</span>
+	</a>
+	<a href="/profil" class={ "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors", templ.KV("bg-blue-50 text-blue-700", activePage == "profil"), templ.KV("text-gray-600 hover:bg-gray-100 hover:text-gray-900", activePage != "profil") }>
+		<i class="fa-solid fa-circle-user w-5 text-center text-xs"></i>
+		<span>Profil</span>
+	</a>
+	<div class="pt-2 mt-2 border-t border-gray-100">
+		<button onclick="logout()" class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
+			<i class="fa-solid fa-right-from-bracket w-5 text-center text-xs"></i>
+			<span>Keluar</span>
+		</button>
+	</div>
+}
+
+templ Topbar(title string, username string) {
+	<header class="sticky top-0 z-30 bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between lg:pl-56">
+		<div class="flex items-center gap-3">
+			<button onclick="toggleDrawer()" class="lg:hidden p-2 rounded-lg hover:bg-gray-100 text-gray-600">
+				<i class="fa-solid fa-bars text-lg"></i>
 			</button>
-			<span class="page-title">{ title }</span>
+			<h1 class="text-base font-semibold text-gray-900">{ title }</h1>
+		</div>
+		<div class="flex items-center gap-2">
+			<span class="text-xs text-gray-500 hidden sm:inline">{ username }</span>
+			<div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+				<i class="fa-solid fa-user text-blue-600 text-xs"></i>
+			</div>
 		</div>
 	</header>
 }
 
 templ BottomNav(activePage string) {
-	<nav class="bottom-nav">
-		<a href="/" class={ "nav-link", activePage == "dashboard" }><i class="bi bi-house-door"></i><span>Beranda</span></a>
-		<a href="/pegawai" class={ "nav-link", activePage == "pegawai" }><i class="bi bi-people"></i><span>Pegawai</span></a>
-		<a href="/scrape" class={ "nav-link", activePage == "scrape" }><i class="bi bi-arrow-repeat"></i><span>Scrape</span></a>
-		<a href="/settings" class={ "nav-link", activePage == "settings" }><i class="bi bi-gear"></i><span>Lainnya</span></a>
+	<!-- Mobile bottom nav -->
+	<nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 lg:hidden z-30">
+		<div class="flex justify-around py-1">
+			<a href="/" class={ "flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] font-medium", templ.KV("text-blue-600", activePage == "dashboard"), templ.KV("text-gray-500", activePage != "dashboard") }>
+				<i class="fa-solid fa-house text-base"></i>
+				<span>Beranda</span>
+			</a>
+			<a href="/pegawai" class={ "flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] font-medium", templ.KV("text-blue-600", activePage == "pegawai"), templ.KV("text-gray-500", activePage != "pegawai") }>
+				<i class="fa-solid fa-users text-base"></i>
+				<span>Pegawai</span>
+			</a>
+			<a href="/scrape" class={ "flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] font-medium", templ.KV("text-blue-600", activePage == "scrape"), templ.KV("text-gray-500", activePage != "scrape") }>
+				<i class="fa-solid fa-rotate text-base"></i>
+				<span>Scrape</span>
+			</a>
+			<a href="/settings" class={ "flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] font-medium", templ.KV("text-blue-600", activePage == "settings"), templ.KV("text-gray-500", activePage != "settings") }>
+				<i class="fa-solid fa-gear text-base"></i>
+				<span>Lainnya</span>
+			</a>
+		</div>
 	</nav>
 }

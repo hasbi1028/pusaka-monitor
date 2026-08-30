@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 
+	"github.com/hasbiawal/pusaka-monitor/internal/crypto"
 	"github.com/hasbiawal/pusaka-monitor/internal/models"
 )
 
@@ -36,6 +37,14 @@ func (h *PegawaiHandler) List(c *gin.Context) {
 	var pegawai []models.Pegawai
 	q.Order("nama").Find(&pegawai)
 
+	// Decrypt password_pusaka untuk response (hanya untuk admin sendiri)
+	for i := range pegawai {
+		if pegawai[i].PasswordPusaka != "" {
+			// Sembunyikan password di response list
+			pegawai[i].PasswordPusaka = "••••••••"
+		}
+	}
+
 	c.JSON(http.StatusOK, models.ApiResponse{Success: true, Data: pegawai})
 }
 
@@ -56,6 +65,14 @@ func (h *PegawaiHandler) Create(c *gin.Context) {
 		return
 	}
 
+	// Encrypt password Pusaka sebelum simpan
+	pwd := req.PasswordPusaka
+	if pwd != "" {
+		if encrypted, err := crypto.Encrypt(pwd); err == nil {
+			pwd = encrypted
+		}
+	}
+
 	pegawai := models.Pegawai{
 		ID:             uuid.New().String(),
 		InstansiID:     instStr,
@@ -63,7 +80,7 @@ func (h *PegawaiHandler) Create(c *gin.Context) {
 		Nama:           req.Nama,
 		Jabatan:        req.Jabatan,
 		Golongan:       req.Golongan,
-		PasswordPusaka: req.PasswordPusaka,
+		PasswordPusaka: pwd,
 		Aktif:          true,
 	}
 
@@ -72,6 +89,8 @@ func (h *PegawaiHandler) Create(c *gin.Context) {
 		return
 	}
 
+	// Response: sembunyikan password
+	pegawai.PasswordPusaka = "••••••••"
 	c.JSON(http.StatusCreated, models.ApiResponse{Success: true, Data: pegawai})
 }
 
@@ -95,13 +114,20 @@ func (h *PegawaiHandler) Update(c *gin.Context) {
 	existing.Nama = req.Nama
 	existing.Jabatan = req.Jabatan
 	existing.Golongan = req.Golongan
-	if req.PasswordPusaka != "" {
-		existing.PasswordPusaka = req.PasswordPusaka
+	if req.PasswordPusaka != "" && req.PasswordPusaka != "••••••••" {
+		// Encrypt password baru
+		if encrypted, err := crypto.Encrypt(req.PasswordPusaka); err == nil {
+			existing.PasswordPusaka = encrypted
+		} else {
+			existing.PasswordPusaka = req.PasswordPusaka
+		}
 	}
 	existing.UpdatedAt = time.Now()
 
 	h.DB.Save(&existing)
 
+	// Response: sembunyikan password
+	existing.PasswordPusaka = "••••••••"
 	c.JSON(http.StatusOK, models.ApiResponse{Success: true, Data: existing})
 }
 

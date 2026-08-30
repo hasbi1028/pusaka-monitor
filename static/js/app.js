@@ -1,50 +1,63 @@
-// Pusaka Monitor - Shared JavaScript (Basecoat UI)
+// Pusaka Monitor — Shared JavaScript (Flowbite + Vanilla JS)
 
-// Toggle Sidebar (Mobile)
-function toggleSidebar() {
-    const sidebar = document.getElementById('sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    sidebar.classList.toggle('show');
-    overlay.classList.toggle('show');
+// ========== TOAST ==========
+function showToast(message, type = 'success') {
+    const colors = {
+        success: 'text-green-800 bg-green-50 border-green-300',
+        danger:  'text-red-800 bg-red-50 border-red-300',
+        warning: 'text-yellow-800 bg-yellow-50 border-yellow-300',
+        info:    'text-blue-800 bg-blue-50 border-blue-300'
+    };
+    const icons = {
+        success: '✅',
+        danger:  '❌',
+        warning: '⚠️',
+        info:    'ℹ️'
+    };
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+    const toast = document.createElement('div');
+    toast.className = `flex items-center gap-2 px-4 py-3 rounded-lg border text-sm font-medium shadow-lg transition-all duration-300 opacity-0 translate-y-2 ${colors[type] || colors.success}`;
+    toast.innerHTML = `<span>${icons[type] || ''}</span><span>${message}</span>`;
+    container.appendChild(toast);
+    requestAnimationFrame(() => { toast.classList.remove('opacity-0', 'translate-y-2'); });
+    setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
 }
 
-// Logout
+// ========== SIDEBAR TOGGLE (mobile) ==========
+function toggleDrawer() {
+    const drawer = document.getElementById('sidebar-drawer');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (drawer && backdrop) {
+        drawer.classList.toggle('translate-x-0');
+        drawer.classList.toggle('-translate-x-full');
+        backdrop.classList.toggle('hidden');
+    }
+}
+
+function closeDrawer() {
+    const drawer = document.getElementById('sidebar-drawer');
+    const backdrop = document.getElementById('sidebar-backdrop');
+    if (drawer) { drawer.classList.add('-translate-x-full'); drawer.classList.remove('translate-x-0'); }
+    if (backdrop) backdrop.classList.add('hidden');
+}
+
+// ========== LOGOUT ==========
 async function logout() {
-	await fetch('/api/auth/logout', { method: 'POST' });
-	window.location.href = '/login';
+    try { await fetch('/api/auth/logout', { method: 'POST' }); } catch {}
+    window.location.href = '/login';
 }
 
-// Show loading on button
+// ========== LOADING BUTTON ==========
 function showLoading(btn) {
     btn.disabled = true;
     btn.dataset.original = btn.innerHTML;
-    btn.innerHTML = '<i class="bi bi-arrow-repeat animate-spin"></i> Memproses...';
+    btn.innerHTML = '<svg class="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> Memproses...';
 }
-
-// Hide loading
 function hideLoading(btn) {
     btn.disabled = false;
     if (btn.dataset.original) btn.innerHTML = btn.dataset.original;
-}
-
-// Show toast notification (Basecoat alert, fixed top-right)
-function showToast(message, type = 'success') {
-    const variant = type === 'danger' ? 'destructive' : type === 'warning' ? 'secondary' : 'default';
-    const toast = document.createElement('div');
-    toast.className = 'alert';
-    if (variant !== 'default') toast.setAttribute('data-variant', variant);
-    toast.style.position = 'fixed';
-    toast.style.top = '36px';
-    toast.style.right = '12px';
-    toast.style.zIndex = '9999';
-    toast.style.minWidth = '280px';
-    toast.style.maxWidth = '90vw';
-    toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-    toast.innerHTML = `<section>${message}</section>`;
-    document.body.appendChild(toast);
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transition = 'opacity 0.3s';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
 }

@@ -4,21 +4,30 @@ import "time"
 
 // Instansi (tenant)
 type Instansi struct {
-	ID           string     `gorm:"primaryKey" json:"id"`
-	Nama         string     `gorm:"not null" json:"nama"`
-	JnsInstansi  string     `gorm:"default:kua" json:"jns_instansi"`
-	Kabupaten    string     `gorm:"not null" json:"kabupaten"`
-	Provinsi     string     `gorm:"not null" json:"provinsi"`
-	Alamat       string     `json:"alamat"`
-	Telepon      string     `json:"telepon"`
-	Email        string     `json:"email"`
-	Aktif        bool       `gorm:"default:true" json:"aktif"`
-	Status       string     `gorm:"default:pending" json:"status"`
-	ApprovedAt   *time.Time `json:"approved_at"`
-	RejectedAt   *time.Time `json:"rejected_at"`
-	RejectReason string     `json:"reject_reason"`
-	CreatedAt    time.Time  `json:"created_at"`
-	UpdatedAt    time.Time  `json:"updated_at"`
+	ID             string     `gorm:"primaryKey" json:"id"`
+	Nama           string     `gorm:"not null" json:"nama"`
+	JnsInstansi    string     `gorm:"default:kua" json:"jns_instansi"`
+	Kabupaten      string     `gorm:"not null" json:"kabupaten"`
+	Provinsi       string     `gorm:"not null" json:"provinsi"`
+	Alamat         string     `json:"alamat"`
+	Telepon        string     `json:"telepon"`
+	Email          string     `json:"email"`
+	Aktif          bool       `gorm:"default:true" json:"aktif"`
+	Status         string     `gorm:"default:pending" json:"status"`
+	// Jam kerja normal
+	JamMasuk       string     `gorm:"default:07:30" json:"jam_masuk"`
+	JamPulang      string     `gorm:"default:16:00" json:"jam_pulang"`
+	Toleransi      int        `gorm:"default:15" json:"toleransi"`
+	// Jam kerja Ramadan
+	JamMasukRam    string     `gorm:"default:07:00" json:"jam_masuk_ram"`
+	JamPulangRam   string     `gorm:"default:15:30" json:"jam_pulang_ram"`
+	ToleransiRam   int        `gorm:"default:15" json:"toleransi_ram"`
+	ModeRamadan    bool       `gorm:"default:false" json:"mode_ramadan"`
+	ApprovedAt     *time.Time `json:"approved_at"`
+	RejectedAt     *time.Time `json:"rejected_at"`
+	RejectReason   string     `json:"reject_reason"`
+	CreatedAt      time.Time  `json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
 }
 
 // User (auth)
@@ -104,6 +113,31 @@ type ApprovalLog struct {
 	Actor      string    `gorm:"default:system" json:"actor"`
 	Note       string    `json:"note"`
 	CreatedAt  time.Time `json:"created_at"`
+}
+
+// Cuti — data cuti pegawai
+type Cuti struct {
+	ID            string    `gorm:"primaryKey" json:"id"`
+	InstansiID    string    `gorm:"not null" json:"instansi_id"`
+	NIP           string    `gorm:"not null" json:"nip"`
+	Nama          string    `gorm:"not null" json:"nama"`
+	TanggalMulai  string    `gorm:"not null" json:"tanggal_mulai"` // YYYY-MM-DD
+	TanggalAkhir  string    `gorm:"not null" json:"tanggal_akhir"` // YYYY-MM-DD
+	Keterangan    string    `json:"keterangan"`
+	ApprovedBy    string    `json:"approved_by"`
+	CreatedAt     time.Time `json:"created_at"`
+}
+
+// Schedule — jadwal auto-scrape
+type Schedule struct {
+	ID        string    `gorm:"primaryKey" json:"id"`
+	Jam       int       `gorm:"not null" json:"jam"`        // 0-23
+	Menit     int       `gorm:"not null" json:"menit"`      // 0-59
+	Label     string    `gorm:"not null" json:"label"`      // e.g. "Pagi", "Sore"
+	Aktif     bool      `gorm:"default:true" json:"aktif"`
+	Mode      string    `gorm:"default:all" json:"mode"`    // all | belum_masuk | belum_pulang
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 // API Response

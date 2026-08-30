@@ -56,7 +56,7 @@ func Layout(title string, username string, role string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - Pusaka Monitor</title><link href=\"https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/basecoat.cdn.min.css\" rel=\"stylesheet\"><link href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css\" rel=\"stylesheet\"><link href=\"/static/css/app.css?v=5\" rel=\"stylesheet\"></head><body class=\"bg-background text-foreground\"><div class=\"marquee-bar\"><div class=\"marquee-content\"><i class=\"bi bi-info-circle\"></i> Aplikasi ini <strong>HANYA membaca</strong> riwayat presensi dari Pusaka Kemenag &mdash; tidak melakukan, mengubah, atau membuat data absensi fiktif/palsu. &nbsp;&nbsp;&bull;&nbsp;&nbsp; Data diambil secara otomatis untuk rekap kehadiran &nbsp;&nbsp;&bull;&nbsp;&nbsp; Pusaka Monitor v1.0</div></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - Pusaka Monitor</title><link href=\"https://cdn.jsdelivr.net/npm/basecoat-css@1.0.2/dist/basecoat.cdn.min.css\" rel=\"stylesheet\"><link href=\"https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css\" rel=\"stylesheet\"><link href=\"/static/css/app.css?v=6\" rel=\"stylesheet\"></head><body class=\"bg-background text-foreground\"><div class=\"marquee-bar\"><div class=\"marquee-content\"><i class=\"bi bi-info-circle\"></i> Aplikasi ini <strong>HANYA membaca</strong> riwayat presensi dari Pusaka Kemenag &mdash; tidak melakukan, mengubah, atau membuat data absensi fiktif/palsu. &nbsp;&nbsp;&bull;&nbsp;&nbsp; Data diambil secara otomatis untuk rekap kehadiran &nbsp;&nbsp;&bull;&nbsp;&nbsp; Pusaka Monitor v1.0</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -93,7 +93,7 @@ func Sidebar(activePage string) templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"sidebar-overlay\" id=\"sidebarOverlay\" onclick=\"toggleSidebar()\"></div><aside class=\"sidebar\" id=\"sidebar\"><div class=\"brand\"><i class=\"bi bi-calendar-check\"></i> <span>Pusaka Monitor</span></div><nav class=\"nav-menu\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<div class=\"sidebar-overlay\" id=\"sidebarOverlay\" onclick=\"toggleSidebar()\"></div><aside class=\"sidebar\" id=\"sidebar\"><div class=\"brand\"><div class=\"brand-icon\"><i class=\"bi bi-shield-lock\"></i></div><div class=\"brand-text\"><span class=\"brand-name\">Pusaka Monitor</span> <span class=\"brand-sub\">Sistem Monitoring Kehadiran</span></div></div><nav class=\"nav-menu\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -225,7 +225,7 @@ func Sidebar(activePage string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\"><i class=\"bi bi-people-fill\"></i> User Mgmt</a> <a href=\"#\" onclick=\"logout()\" class=\"nav-link logout-link\"><i class=\"bi bi-box-arrow-right\"></i> Keluar</a></nav></aside>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 16, "\"><i class=\"bi bi-people-fill\"></i> User Mgmt</a> <a href=\"#\" onclick=\"logout()\" class=\"nav-link logout-link\"><i class=\"bi bi-box-arrow-right\"></i> Keluar</a></nav><div class=\"sidebar-version\">v1.0 &middot; Pusaka Kemenag</div></aside>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -261,7 +261,7 @@ func Topbar(title string) templ.Component {
 		var templ_7745c5c3_Var17 string
 		templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/layout.templ`, Line: 71, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `templates/layout.templ`, Line: 75, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {

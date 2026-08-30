@@ -29,6 +29,8 @@ func Init(dbPath string) *gorm.DB {
 		&models.Session{},
 		&models.Setting{},
 		&models.ApprovalLog{},
+		&models.Schedule{},
+		&models.Cuti{},
 	)
 	if err != nil {
 		log.Fatal("Failed to migrate database:", err)

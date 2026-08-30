@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"sync"
@@ -13,6 +14,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
+	"github.com/hasbiawal/pusaka-monitor/internal/crypto"
 	"github.com/hasbiawal/pusaka-monitor/internal/models"
 	"github.com/hasbiawal/pusaka-monitor/internal/scraper"
 )
@@ -47,22 +49,19 @@ func (h *ScrapeHandler) CreateJobs(c *gin.Context) {
 		hasAbsen := h.DB.Where("n_ip = ? AND instansi_id = ? AND tanggal = ?", p.NIP, instID, today).First(&existing).Error == nil
 
 		switch mode {
-		case "belum_masuk":
-			// Hanya yg BELUM punya absensi hari ini (atau jam_masuk kosong)
-			if hasAbsen && existing.JamMasuk != "" && existing.JamMasuk != "-" {
-				continue
+			case "belum_masuk":
+				// Hanya yg BELUM punya absensi hari ini (atau jam_masuk kosong)
+				if hasAbsen && existing.JamMasuk != "" && existing.JamMasuk != "-" {
+					continue
+				}
+			case "belum_pulang":
+				// Hanya yg SUDAH masuk tapi BELUM pulang
+				if !(hasAbsen && existing.JamMasuk != "" && existing.JamMasuk != "-" && (existing.JamPulang == "" || existing.JamPulang == "-")) {
+					continue
+				}
+			default: // all — scrape SEMUA pegawai, tanpa skip
+				// Tidak ada filter: semua pegawai dibuat job-nya
 			}
-		case "belum_pulang":
-			// Hanya yg SUDAH masuk tapi BELUM pulang
-			if !(hasAbsen && existing.JamMasuk != "" && existing.JamMasuk != "-" && (existing.JamPulang == "" || existing.JamPulang == "-")) {
-				continue
-			}
-		default: // all
-			// SKILL: skip yg sudah lengkap
-			if hasAbsen && isLengkap(existing.JamMasuk, existing.JamPulang) {
-				continue
-			}
-		}
 
 		job := models.Job{
 			ID:           uuid.New().String(),
@@ -299,25 +298,79 @@ func processJob(db *gorm.DB, job models.Job) {
 		}
 	}
 
+	// Decrypt password Pusaka sebelum scrape
+	pwd := pegawai.PasswordPusaka
+	if pwd != "" {
+		if decrypted, err := crypto.Decrypt(pwd); err == nil {
+			pwd = decrypted
+		}
+	}
+
 	// Scrape via HTTP API client (Pusaka v3)
-	client := scraper.NewClient(pegawai.NIP, pegawai.Nama, pegawai.PasswordPusaka)
+	client := scraper.NewClient(pegawai.NIP, pegawai.Nama, pwd)
 	result := client.ScrapeToday()
 
+	log.Printf("[SCRAPER] %s (%s) → success=%v, masuk=%s, pulang=%s, err=%s",
+		pegawai.Nama, job.EmployeeID, result.Success, result.JamMasuk, result.JamPulang, result.Error)
+
+	// Jika data belum ada di Pusaka → cek dulu apakah hari libur
 	if !result.Success {
+		status := "Belum Masuk"
+		// Cek hari Minggu
+		if t, err := time.Parse("2006-01-02", today); err == nil && t.Weekday() == time.Sunday {
+			status = "Libur"
+		}
+		// Cek cuti
+		var cutiCount int64
+		db.Model(&models.Cuti{}).Where("nip = ? AND tanggal_mulai <= ? AND tanggal_akhir >= ?",
+			job.EmployeeID, today, today).Count(&cutiCount)
+		if cutiCount > 0 {
+			status = "Cuti"
+		}
+
+		record := models.Absensi{
+			ID:         uuid.New().String(),
+			InstansiID: pegawai.InstansiID,
+			NIP:        job.EmployeeID,
+			Nama:       pegawai.Nama,
+			Tanggal:    today,
+			JamMasuk:   "-",
+			JamPulang:  "-",
+			Status:     status,
+			ScrapedAt:  now,
+		}
+		db.Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "n_ip"}, {Name: "tanggal"}, {Name: "instansi_id"}},
+			DoUpdates: clause.AssignmentColumns([]string{"nama", "scraped_at"}),
+		}).Create(&record)
+
 		db.Model(&job).Updates(map[string]interface{}{
-			"status":       "failed",
+			"status":       "done",
+			"tanggal":      today,
+			"jam_masuk":    "-",
+			"jam_pulang":   "-",
 			"error":        result.Error,
 			"completed_at": &now,
 		})
 		return
 	}
 
-	// Simpan ke tabel absensi (UPSERT natif via unique index)
-	absStatus := result.Status
-	if absStatus == "" {
-		absStatus = "-"
+	// Ambil jam kerja dari instansi
+	var instansi models.Instansi
+	db.First(&instansi, "id = ?", pegawai.InstansiID)
+
+	// Pilih jam kerja berdasarkan mode ramadan
+	jamMasukStd := instansi.JamMasuk
+	toleransi := instansi.Toleransi
+	if instansi.ModeRamadan {
+		jamMasukStd = instansi.JamMasukRam
+		toleransi = instansi.ToleransiRam
 	}
+
+	// Simpan ke tabel absensi (UPSERT natif via unique index)
+	absStatus := scraper.DetermineStatus(result.JamMasuk, result.JamPulang, jamMasukStd, toleransi)
 	record := models.Absensi{
+		ID:         uuid.New().String(),
 		InstansiID: pegawai.InstansiID,
 		NIP:        job.EmployeeID,
 		Nama:       pegawai.Nama,
