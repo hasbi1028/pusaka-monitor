@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
-
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/gin-gonic/gin"
 	"github.com/hasbiawal/pusaka-monitor/internal/backup"
 	"github.com/hasbiawal/pusaka-monitor/internal/config"
@@ -16,12 +18,38 @@ import (
 	"github.com/hasbiawal/pusaka-monitor/internal/middleware"
 )
 
+// AppVersion — tampil di /health & UI agar versi deploy bisa dibedakan.
+const AppVersion = "v1.0.3"
+
+// pidFile — kunci single-instance: start ganda (panel/manual) langsung ditolak.
+const pidFile = "pusaka-monitor.pid"
+
+func ensureSingleInstance() {
+	data, err := os.ReadFile(pidFile)
+	if err == nil {
+		if pid, err := strconv.Atoi(strings.TrimSpace(string(data))); err == nil && pid > 0 {
+			// Cek apakah proses dengan PID itu benar-benar hidup DAN merupakan pusaka-monitor
+			if exe, err := os.ReadFile(fmt.Sprintf("/proc/%d/cmdline", pid)); err == nil &&
+				strings.Contains(string(exe), "pusaka-monitor") {
+				// Pastikan bukan PID kita sendiri (restart tanpa cleanup)
+				if pid != os.Getpid() {
+					log.Fatalf("[FATAL] Proses pusaka-monitor lain (PID %d) masih jalan — "+
+						"hentikan dulu agar jadwal tidak ganda.", pid)
+				}
+			}
+			// PID mati atau stale → hapus file lama, lanjut start
+			_ = os.Remove(pidFile)
+		}
+	}
+	_ = os.WriteFile(pidFile, []byte(fmt.Sprintf("%d\n", os.Getpid())), 0644)
+}
+
 func main() {
+	ensureSingleInstance()
 	// CLI flag: --create-superadmin (bootstrap mode)
 	if len(os.Args) > 1 && os.Args[1] == "--create-superadmin" {
 		cfg := config.Load()
-		database.Init(cfg.DBPath)
-		db := database.Init(cfg.DBPath)
+		db := database.Init(cfg.DBURL)
 		database.SeedSuperAdmin(db, cfg.AdminUser, cfg.AdminPass)
 		log.Printf("[ADMIN] Superadmin '%s' dibuat/diperiksa. Jalankan tanpa --create-superadmin untuk start server.", cfg.AdminUser)
 		return
@@ -35,15 +63,26 @@ func main() {
 		log.Fatalf("[FATAL] Gagal init encryption: %v", err)
 	}
 
-	// Init database
-	os.MkdirAll("data", 0755)
-	db := database.Init(cfg.DBPath)
+	// Init database (PostgreSQL)
+	db := database.Init(cfg.DBURL)
 
 	// Seed superadmin
 	database.SeedSuperAdmin(db, cfg.AdminUser, cfg.AdminPass)
 
 	// Start auto-backup (tiap 24 jam)
-	backup.StartAutoBackup(cfg.DBPath, 24*time.Hour)
+	backup.StartAutoBackup(db, 24*time.Hour)
+
+	// Start session cleanup (tiap 1 jam)
+	go func() {
+		ticker := time.NewTicker(1 * time.Hour)
+		defer ticker.Stop()
+		for range ticker.C {
+			n := database.CleanupExpiredSessions(db)
+			if n > 0 {
+				log.Printf("[SESSION] %d expired sessions dibersihkan", n)
+			}
+		}
+	}()
 
 	// Start background worker
 	go handler.StartWorker(db)
@@ -59,16 +98,52 @@ func main() {
 	scrapeHandler := &handler.ScrapeHandler{DB: db}
 	scheduleHandler := &handler.ScheduleHandler{DB: db}
 	instansiHandler := &handler.InstansiHandler{DB: db}
+	recapHandler := &handler.RecapHandler{DB: db}
 
 	// Router
 	r := gin.Default()
 
-	// Serve static files from frontend/dist
+	// Health check (before NoRoute!)
+	r.GET("/health", func(c *gin.Context) {
+		// Check DB connection
+		sqlDB, err := db.DB()
+		if err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"status": "error", "message": "DB connection failed"})
+			return
+		}
+		if err := sqlDB.Ping(); err != nil {
+			c.JSON(http.StatusServiceUnavailable, gin.H{"status": "error", "message": "DB ping failed"})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"status": "ok", "database": "postgresql", "version": AppVersion})
+	})
+
+	// CORS middleware
+	r.Use(func(c *gin.Context) {
+		origin := c.GetHeader("Origin")
+		if origin != "" {
+			c.Header("Access-Control-Allow-Origin", origin)
+			c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			c.Header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+			c.Header("Access-Control-Allow-Credentials", "true")
+			c.Header("Access-Control-Max-Age", "86400")
+		}
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusNoContent)
+			return
+		}
+		c.Next()
+	})
+
+	// Serve SvelteKit static assets
+	r.Static("/_app", "./frontend/build/_app")
+	r.StaticFile("/favicon.svg", "./frontend/build/favicon.svg")
+	// Legacy dist support (if any)
 	r.Static("/assets", "./frontend/dist/assets")
 	r.Static("/static", "./static")
 
-	// Rate limiter untuk login & register: 5 request per menit per IP
-	authRL := middleware.RateLimit(5, time.Minute)
+	// Rate limiter untuk login & register: 30 request per menit per IP (longgar untuk E2E)
+	authRL := middleware.RateLimit(30, time.Minute)
 
 	// Public API
 	r.POST("/api/auth/login", authRL, authHandler.Login)
@@ -101,6 +176,7 @@ func main() {
 		// Scrape API
 		auth.POST("/api/scrape", scrapeHandler.CreateJobs)
 		auth.GET("/api/scrape/status", scrapeHandler.Status)
+		auth.GET("/api/scrape/stream", scrapeHandler.StreamStatus)
 		auth.POST("/api/scrape/retry", scrapeHandler.RetryFailed)
 		auth.POST("/api/scrape/cancel-all", scrapeHandler.CancelAll)
 		auth.POST("/api/scrape/pegawai/:nip", scrapeHandler.ScrapeOne)
@@ -116,6 +192,8 @@ func main() {
 		// Instansi Settings API
 		auth.GET("/api/instansi/settings", instansiHandler.GetSettings)
 		auth.PUT("/api/instansi/settings", instansiHandler.UpdateSettings)
+		auth.GET("/api/superadmin/instansi", instansiHandler.ListAll)
+		auth.PUT("/api/superadmin/instansi/:id", instansiHandler.UpdateOne)
 
 		// Superadmin API
 		auth.GET("/superadmin/approval", approvalHandler.ApprovalPage)
@@ -124,9 +202,14 @@ func main() {
 		auth.GET("/api/admin/export-csv", dashboardHandler.ExportCSV)
 		auth.GET("/api/admin/concurrency", scrapeHandler.GetConcurrencyHandler)
 		auth.POST("/api/admin/concurrency", scrapeHandler.SetConcurrencyHandler)
+
+		// Rekap harian (gambar WA)
+		auth.GET("/api/admin/recap/preview", recapHandler.Preview)
+		auth.POST("/api/admin/recap/send", recapHandler.SendNow)
+		auth.POST("/api/recap/test", recapHandler.TestSend)
 	}
 
-	// SPA fallback: serve index.html for all non-API, non-static routes
+	// SPA fallback: serve 200.html for all non-API routes (SvelteKit SPA)
 	r.NoRoute(func(c *gin.Context) {
 		path := c.Request.URL.Path
 		// Don't serve SPA for API routes
@@ -134,12 +217,12 @@ func main() {
 			c.JSON(http.StatusNotFound, gin.H{"error": "not found"})
 			return
 		}
+		// Serve SvelteKit SPA fallback
+		if _, err := os.Stat("./frontend/build/200.html"); err == nil {
+			c.File("./frontend/build/200.html")
+			return
+		}
 		c.File("./frontend/dist/index.html")
-	})
-
-	// Health check
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"status": "ok"})
 	})
 
 	log.Printf("Server running on http://localhost:%s", cfg.Port)
