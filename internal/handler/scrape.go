@@ -321,6 +321,20 @@ func processJob(db *gorm.DB, job models.Job) {
 
 	// Jika data belum ada di Pusaka → cek dulu apakah hari libur
 	if !result.Success {
+		// AUTO-RETRY: jika masih ada jatah percobaan, reset ke pending
+		if job.Attempts < job.MaxAttempts {
+			db.Model(&job).Updates(map[string]interface{}{
+				"status":      "pending",
+				"error":       result.Error,
+				"worker_id":   "",
+				"claimed_at":  gorm.Expr("NULL"),
+				"progress":    0,
+				"step_label":  fmt.Sprintf("Retry %d/%d: %s", job.Attempts, job.MaxAttempts, result.Error),
+			})
+			log.Printf("[SCRAPER] %s → retry %d/%d (%s)", pegawai.Nama, job.Attempts, job.MaxAttempts, result.Error)
+			return
+		}
+
 		status := "Belum Masuk"
 		// Cek hari libur (mingguan instansi + tanggal merah)
 		if IsLibur(db, pegawai.InstansiID, today) {
@@ -358,9 +372,10 @@ func processJob(db *gorm.DB, job models.Job) {
 			"error":        result.Error,
 			"progress":     scraper.TotalSteps,
 			"total_steps":  scraper.TotalSteps,
-			"step_label":   "Selesai",
+			"step_label":   "Selesai (gagal setelah semua percobaan)",
 			"completed_at": &now,
 		})
+		log.Printf("[SCRAPER] %s → done (gagal setelah %d percobaan: %s)", pegawai.Nama, job.MaxAttempts, result.Error)
 		return
 	}
 
