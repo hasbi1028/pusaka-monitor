@@ -30,9 +30,9 @@ func (h *ScrapeHandler) CreateJobs(c *gin.Context) {
 	mode := c.DefaultQuery("mode", "all") // all | belum_masuk | belum_pulang
 	today := todayWITA()
 
-	q := h.DB.Where("aktif = 1 AND password_pusaka != ''")
+	q := h.DB.Where("aktif = ? AND password_pusaka != ''", true)
 	if role != "superadmin" && instansiID != "" {
-		q = h.DB.Where("instansi_id = ? AND aktif = 1 AND password_pusaka != ''", instansiID)
+		q = h.DB.Where("instansi_id = ? AND aktif = ? AND password_pusaka != ''", instansiID, true)
 	}
 
 	var pegawaiList []models.Pegawai
@@ -98,25 +98,14 @@ func isLengkap(masuk, pulang string) bool {
 func (h *ScrapeHandler) Status(c *gin.Context) {
 	instansiID, _ := c.Get("instansi_id")
 	role, _ := c.Get("role")
+	instID, _ := instansiID.(string)
+	roleStr, _ := role.(string)
 
-	// Superadmin lihat semua instansi (job punya instansi_id asli pegawai,
-	// bukan "" seperti context superadmin)
-	qScope := h.DB
-	if role != "superadmin" && instansiID != "" {
-		qScope = h.DB.Where("instansi_id = ?", instansiID)
+	stats, jobs, err := queryScrapeStatus(h.DB, instID, roleStr)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, models.ApiResponse{Success: false, Error: "Gagal memuat status"})
+		return
 	}
-
-	var stats models.JobStats
-	qScope.Model(&models.Job{}).
-		Select(`
-			SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
-			SUM(CASE WHEN status = 'running' THEN 1 ELSE 0 END) as running,
-			SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as done,
-			SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed
-		`).Scan(&stats)
-
-	var jobs []models.Job
-	qScope.Where("1=1").Order("created_at DESC").Limit(500).Find(&jobs)
 
 	c.JSON(http.StatusOK, models.ApiResponse{
 		Success: true,
@@ -298,6 +287,16 @@ func processJob(db *gorm.DB, job models.Job) {
 		}
 	}
 
+	// Stagger: tiap job mulai dengan jeda acak 0-90 detik agar 8 worker
+	// tidak login ke Pusaka di detik yang sama (thundering herd = ciri bot).
+	// Progres 0 + label "Antre giliran" supaya terlihat di SSE stream.
+	db.Model(&models.Job{}).Where("id = ?", job.ID).Updates(map[string]interface{}{
+		"progress":    0,
+		"total_steps": scraper.TotalSteps,
+		"step_label":  "Antre giliran",
+	})
+	time.Sleep(time.Duration(rand.Intn(91)) * time.Second)
+
 	// Decrypt password Pusaka sebelum scrape
 	pwd := pegawai.PasswordPusaka
 	if pwd != "" {
@@ -306,8 +305,15 @@ func processJob(db *gorm.DB, job models.Job) {
 		}
 	}
 
-	// Scrape via HTTP API client (Pusaka v3)
+	// Scrape via HTTP API client (Pusaka v3) — progres ditulis ke DB tiap langkah
 	client := scraper.NewClient(pegawai.NIP, pegawai.Nama, pwd)
+	client.OnProgress = func(step int, label string) {
+		db.Model(&models.Job{}).Where("id = ?", job.ID).Updates(map[string]interface{}{
+			"progress":    step,
+			"total_steps": scraper.TotalSteps,
+			"step_label":  label,
+		})
+	}
 	result := client.ScrapeToday()
 
 	log.Printf("[SCRAPER] %s (%s) → success=%v, masuk=%s, pulang=%s, err=%s",
@@ -350,6 +356,9 @@ func processJob(db *gorm.DB, job models.Job) {
 			"jam_masuk":    "-",
 			"jam_pulang":   "-",
 			"error":        result.Error,
+			"progress":     scraper.TotalSteps,
+			"total_steps":  scraper.TotalSteps,
+			"step_label":   "Selesai",
 			"completed_at": &now,
 		})
 		return
@@ -368,6 +377,11 @@ func processJob(db *gorm.DB, job models.Job) {
 	}
 
 	// Simpan ke tabel absensi (UPSERT natif via unique index)
+	db.Model(&models.Job{}).Where("id = ?", job.ID).Updates(map[string]interface{}{
+		"progress":    9,
+		"total_steps": scraper.TotalSteps,
+		"step_label":  "Simpan",
+	})
 	absStatus := scraper.DetermineStatus(result.JamMasuk, result.JamPulang, jamMasukStd, toleransi)
 	record := models.Absensi{
 		ID:         uuid.New().String(),
@@ -390,6 +404,9 @@ func processJob(db *gorm.DB, job models.Job) {
 		"tanggal":      result.Tanggal,
 		"jam_masuk":    result.JamMasuk,
 		"jam_pulang":   result.JamPulang,
+		"progress":     scraper.TotalSteps,
+		"total_steps":  scraper.TotalSteps,
+		"step_label":   "Selesai",
 		"completed_at": &now,
 	})
 }
@@ -442,23 +459,96 @@ func StartWorker(db *gorm.DB) {
 	}
 	for i := 0; i < MaxWorkers; i++ {
 		go func(workerID int) {
+			done := 0
+			nextBreak := 5 + rand.Intn(4) // istirahat panjang tiap 5-8 job
 			for {
-				if int32(workerID) >= getConcurrency() {
-					// Idle (di atas target) — tunggu sebentar lalu cek lagi
-					time.Sleep(2 * time.Second)
+				if int32(workerID) >= effectiveConcurrency(db) {
+					// Idle (di atas target) — tidur lama, nilai pending di-cache 10 dtk
+					time.Sleep(10 * time.Second)
 					continue
 				}
 				job, ok := claimNext(db)
 				if !ok {
-					time.Sleep(3 * time.Second)
+					time.Sleep(10 * time.Second)
 					continue
 				}
 				processJob(db, job)
-				// Jeda antisebot antar job per worker (reference: 5-12 dtk)
-				time.Sleep(time.Duration(5000+rand.Intn(7000)) * time.Millisecond)
+				done++
+				if done >= nextBreak {
+					// Istirahat panjang 1-3 menit (pola manusia)
+					done = 0
+					nextBreak = 5 + rand.Intn(4)
+					time.Sleep(time.Duration(60+rand.Intn(121)) * time.Second)
+				} else {
+					time.Sleep(jedaNatural())
+				}
 			}
 		}(i)
 	}
+}
+
+// jedaNatural — jeda antar job pola manusia: 80% pendek (5-12 dtk),
+// 20% panjang (20-45 dtk). Uniform murni mudah dikenali sebagai bot.
+func jedaNatural() time.Duration {
+	if rand.Intn(100) < 20 {
+		return time.Duration(20+rand.Intn(26)) * time.Second
+	}
+	return time.Duration(5000+rand.Intn(7000)) * time.Millisecond
+}
+
+// Profil concurrency dinamis — hindari beban "kotak sempurna":
+// ramp-up 3 menit dari 3 worker ke target, taper ke 3 worker saat sisa < 10.
+var batchMu sync.Mutex
+var batchStart time.Time
+var batchWasIdle = true
+
+// Cache hitungan pending — 100 worker idle JANGAN query DB tiap 2 dtk.
+// Satu nilai bersama, refresh maksimal tiap 10 dtk.
+var pendingCacheMu sync.Mutex
+var pendingCacheCount int64
+var pendingCacheAt time.Time
+
+func cachedPending(db *gorm.DB) int64 {
+	pendingCacheMu.Lock()
+	defer pendingCacheMu.Unlock()
+	if time.Since(pendingCacheAt) < 10*time.Second {
+		return pendingCacheCount
+	}
+	var pending int64
+	db.Model(&models.Job{}).Where("status = ?", "pending").Count(&pending)
+	pendingCacheCount = pending
+	pendingCacheAt = time.Now()
+	return pending
+}
+
+func effectiveConcurrency(db *gorm.DB) int32 {
+	target := getConcurrency()
+	pending := cachedPending(db)
+	if pending == 0 {
+		batchMu.Lock()
+		batchWasIdle = true
+		batchMu.Unlock()
+		return target
+	}
+	batchMu.Lock()
+	if batchWasIdle {
+		batchStart = time.Now()
+		batchWasIdle = false
+	}
+	elapsed := time.Since(batchStart)
+	batchMu.Unlock()
+
+	eff := target
+	if elapsed < 3*time.Minute && target > 3 {
+		eff = 3 + int32(float64(target-3)*float64(elapsed)/float64(3*time.Minute))
+	}
+	if pending < 10 && eff > 3 {
+		eff = 3
+	}
+	if eff < 1 {
+		eff = 1
+	}
+	return eff
 }
 
 // getSettingInt — baca setting dari DB

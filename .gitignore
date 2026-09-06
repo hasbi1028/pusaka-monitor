@@ -1,6 +1,7 @@
 data/
 logs/
 backups/
+sessions/
 *.exe
 *.exe~
 *.db
@@ -9,6 +10,9 @@ backups/
 .env
 .env.local
 .env.production
+.env.prod
+*.pid
+pusaka-monitorv*
 node_modules/
 frontend/node_modules/
 frontend/.svelte-kit/
@@ -17,3 +21,6 @@ frontend/test-results/
 frontend-old/
 cmd/
 .pusaka-monitor
+pusaka-monitor
+!deploy.sh
+!README.md
