@@ -54,7 +54,7 @@ func AuthRequired(db *gorm.DB, jwtSecret string) gin.HandlerFunc {
 
 		// Check session in DB
 		var dbSession models.Session
-		if err := db.Where("token = ? AND expires_at > ?", token, gorm.Expr("datetime('now')")).First(&dbSession).Error; err != nil {
+		if err := db.Where("token = ? AND expires_at > ?", token, gorm.Expr("NOW()")).First(&dbSession).Error; err != nil {
 			if strings.HasPrefix(path, "/api/") {
 				c.JSON(http.StatusUnauthorized, models.ApiResponse{Error: "Session expired"})
 				c.Abort()

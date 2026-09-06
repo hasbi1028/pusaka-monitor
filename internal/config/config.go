@@ -7,11 +7,28 @@ import (
 
 type Config struct {
 	Port          string
-	DBPath        string
+	DBURL         string // PostgreSQL connection URL (optional, overrides individual vars)
+	DBPath        string // Legacy: SQLite path (ignored when DBURL is set)
 	JWTSecret     string
 	AdminUser     string
 	AdminPass     string
 	EncryptionKey string
+	// PostgreSQL individual vars (used when DBURL is empty)
+	PostgresHost     string
+	PostgresPort     string
+	PostgresUser     string
+	PostgresPassword string
+	PostgresDB       string
+	PostgresSSLMode  string
+	// GoWA WhatsApp gateway (rekap gambar harian)
+	GowaBaseURL string
+	GowaUser    string
+	GowaPass    string
+	GowaDevice  string
+	RecapGroup  string
+	// Telegram fallback (kirim bila WA gagal)
+	TelegramBotToken string
+	TelegramChatID   string
 }
 
 func Load() *Config {
@@ -35,11 +52,28 @@ func Load() *Config {
 
 	return &Config{
 		Port:          getEnv("PORT", "8080"),
-		DBPath:        getEnv("DB_PATH", "data/presensi.db"),
+		DBURL:         os.Getenv("DATABASE_URL"),
+		DBPath:        getEnv("DB_PATH", "data/presensi.db"), // Legacy, ignored when DATABASE_URL set
 		JWTSecret:     jwtSecret,
 		AdminUser:     getEnv("SUPERADMIN_USERNAME", "admin"),
 		AdminPass:     adminPass,
 		EncryptionKey: encryptionKey,
+		// PostgreSQL
+		PostgresHost:     getEnv("POSTGRES_HOST", "localhost"),
+		PostgresPort:     getEnv("POSTGRES_PORT", "5432"),
+		PostgresUser:     getEnv("POSTGRES_USER", "postgres"),
+		PostgresPassword: os.Getenv("POSTGRES_PASSWORD"),
+		PostgresDB:       getEnv("POSTGRES_DB", "pusaka_monitor"),
+		PostgresSSLMode:  getEnv("POSTGRES_SSLMODE", "disable"),
+		// GoWA
+		GowaBaseURL: getEnv("GOWA_BASE_URL", ""),
+		GowaUser:    getEnv("GOWA_USER", "admin"),
+		GowaPass:    os.Getenv("GOWA_PASS"),
+		GowaDevice:  getEnv("GOWA_DEVICE", "mtsnbot"),
+		RecapGroup:  getEnv("RECAP_GROUP", "120363409303983377@g.us"),
+		// Telegram
+		TelegramBotToken: os.Getenv("TELEGRAM_BOT_TOKEN"),
+		TelegramChatID:   os.Getenv("TELEGRAM_CHAT_ID"),
 	}
 }
 

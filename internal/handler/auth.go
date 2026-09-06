@@ -48,7 +48,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	// Find user
 	var user models.User
-	if err := h.DB.Where("username = ? AND aktif = 1", req.Username).First(&user).Error; err != nil {
+	if err := h.DB.Where("username = ? AND aktif = ?", req.Username, true).First(&user).Error; err != nil {
 		c.JSON(http.StatusUnauthorized, models.ApiResponse{Error: "Username atau password salah"})
 		return
 	}
@@ -186,6 +186,11 @@ func (h *AuthHandler) Me(c *gin.Context) {
 	username, _ := c.Get("username")
 	role, _ := c.Get("role")
 	instansiID, _ := c.Get("instansi_id")
+
+	// Prevent stale auth data — browser must revalidate
+	c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
+	c.Header("Pragma", "no-cache")
+	c.Header("Expires", "0")
 
 	c.JSON(http.StatusOK, models.ApiResponse{
 		Success: true,

@@ -49,12 +49,12 @@ func (h *ApprovalHandler) ApproveReject(c *gin.Context) {
 	case "approve":
 		h.DB.Model(&models.Instansi{}).Where("id = ?", id).Updates(map[string]interface{}{
 			"status":     "approved",
-			"approved_at": gorm.Expr("datetime('now')"),
+			"approved_at": gorm.Expr("NOW()"),
 		})
 	case "reject":
 		h.DB.Model(&models.Instansi{}).Where("id = ?", id).Updates(map[string]interface{}{
 			"status":        "rejected",
-			"rejected_at":   gorm.Expr("datetime('now')"),
+			"rejected_at":   gorm.Expr("NOW()"),
 			"reject_reason": req.Reason,
 		})
 	default:

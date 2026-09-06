@@ -1,0 +1,19 @@
+# DOM Cloud Deploy Configuration
+# Pusaka Monitor - Go Binary + PostgreSQL
+
+features:
+  - go
+  - postgresql
+
+# Build commands
+commands:
+  - go mod tidy
+  - GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -buildvcs=false -o pusaka-monitor .
+  - chmod +x pusaka-monitor
+
+# App start command (Passenger)
+app_start_command: env PORT=$PORT ./pusaka-monitor
+
+# PostgreSQL env vars (set via DOM Cloud portal)
+# POSTGRES_HOST, POSTGRES_PORT, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_DB
+# JWT_SECRET, SUPERADMIN_USERNAME, SUPERADMIN_PASSWORD, ENCRYPTION_KEY

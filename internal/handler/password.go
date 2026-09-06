@@ -41,7 +41,10 @@ func (h *AuthHandler) ResetOwnPassword(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, models.ApiResponse{Error: "Gagal hash password"})
 		return
 	}
-	h.DB.Model(&user).Update("password_hash", hash)
+	if err := h.DB.Model(&models.User{}).Where("id = ?", user.ID).Update("password_hash", hash).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, models.ApiResponse{Error: "Gagal simpan password: " + err.Error()})
+		return
+	}
 
 	c.JSON(http.StatusOK, models.ApiResponse{Success: true, Message: "Password berhasil diubah"})
 }
@@ -80,7 +83,7 @@ func (h *AuthHandler) AdminResetPassword(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, models.ApiResponse{Error: "Gagal hash password"})
 		return
 	}
-	h.DB.Model(&target).Update("password_hash", hash)
+	h.DB.Model(&models.User{}).Where("id = ?", target.ID).Update("password_hash", hash)
 
 	c.JSON(http.StatusOK, models.ApiResponse{Success: true, Message: "Password user berhasil direset"})
 }
@@ -143,7 +146,7 @@ func (h *AuthHandler) SuperadminResetPassword(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, models.ApiResponse{Error: "Gagal hash password"})
 		return
 	}
-	h.DB.Model(&target).Update("password_hash", hash)
+	h.DB.Model(&models.User{}).Where("id = ?", target.ID).Update("password_hash", hash)
 
 	c.JSON(http.StatusOK, models.ApiResponse{Success: true, Message: "Password berhasil direset (superadmin)"})
 }

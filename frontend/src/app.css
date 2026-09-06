@@ -2,8 +2,12 @@
 
 /* Custom utilities */
 :root {
-  --sidebar-width: 14rem;
+  --sidebar-width: 12rem;
 }
+
+/* Compact UI overrides */
+.compact-table th { padding: 0.375rem 0.625rem; }
+.compact-table td { padding: 0.375rem 0.625rem; }
 
 /* Page transition */
 .page-enter {
@@ -15,8 +19,8 @@
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
 
 /* Toast animation */
@@ -26,4 +30,24 @@
 @keyframes slideIn {
   from { opacity: 0; transform: translateX(100%); }
   to { opacity: 1; transform: translateX(0); }
+}
+
+/* View Transitions API (Chrome/Edge) */
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+@keyframes fade-out {
+  to { opacity: 0; }
+}
+@keyframes slide-from-right {
+  from { transform: translateX(30px); opacity: 0; }
+}
+@keyframes slide-to-left {
+  to { transform: translateX(-30px); opacity: 0; }
+}
+::view-transition-old(root) {
+  animation: 0.2s ease fade-out, 0.2s ease slide-to-left;
+}
+::view-transition-new(root) {
+  animation: 0.2s ease fade-in, 0.2s ease slide-from-right;
 }

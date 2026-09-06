@@ -54,15 +54,29 @@ type savedSession struct {
 	TokenSavedAt time.Time         `json:"token_saved_at"`
 }
 
+// TotalSteps — jumlah langkah scrape (ditampilkan sebagai n/10 + persen)
+const TotalSteps = 10
+
+// ProgressFunc — callback tiap langkah scrape (step 1..TotalSteps + label)
+type ProgressFunc func(step int, label string)
+
 // PusakaClient — klien HTTP ke Pusaka v3 (NextAuth flow)
 type PusakaClient struct {
 	NIP         string
 	Nama        string
 	Password    string
+	OnProgress  ProgressFunc
 	cookies     map[string]string
 	token       string
 	tokenSavedAt time.Time
 	mu          sync.Mutex
+}
+
+// report — panggil callback progres (aman dari nil)
+func (c *PusakaClient) report(step int, label string) {
+	if c.OnProgress != nil {
+		c.OnProgress(step, label)
+	}
 }
 
 // NewClient — factory
@@ -196,6 +210,7 @@ func (c *PusakaClient) Login() (string, error) {
 	c.antiBanDelay()
 
 	// 1. CSRF
+	c.report(3, "Ambil CSRF")
 	csrfResp, err := c.doRequest("GET", V3Base+"/api/auth/csrf", "", "", false)
 	if err != nil {
 		return "", err
@@ -215,6 +230,7 @@ func (c *PusakaClient) Login() (string, error) {
 	jitterSleep(500, 1500)
 
 	// 2. POST credentials
+	c.report(4, "Login Pusaka")
 	form := url.Values{}
 	form.Set("csrfToken", csrfBody.CsrfToken)
 	form.Set("email", c.NIP)
@@ -237,6 +253,7 @@ func (c *PusakaClient) Login() (string, error) {
 	jitterSleep(500, 1000)
 
 	// 3. GET token
+	c.report(5, "Ambil token sesi")
 	c.antiBanDelay()
 	tokenResp, err := c.doRequest("GET", V3Base+"/api/auth/session", "", "", false)
 	if err != nil {
@@ -262,6 +279,7 @@ func (c *PusakaClient) Login() (string, error) {
 
 // EnsureToken — reuse jika masih fresh (<50 menit) dari file session
 func (c *PusakaClient) EnsureToken() (string, error) {
+	c.report(2, "Cek sesi")
 	c.mu.Lock()
 	token := c.token
 	savedAt := c.tokenSavedAt
@@ -280,6 +298,7 @@ func (c *PusakaClient) RiwayatPresensi(bulan, tahun int) ([]RiwayatDay, error) {
 	if err != nil {
 		return nil, err
 	}
+	c.report(6, "Ambil riwayat")
 	c.antiBanDelay()
 
 	u := fmt.Sprintf("%s/presensi/api/riwayat-presensi?bulan=%d&tahun=%d", AuthBase, bulan, tahun)

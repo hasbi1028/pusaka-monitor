@@ -3,12 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="view-transition-api" content="same-origin" />
     <title>Pusaka Monitor</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin />
     %sveltekit.head%
   </head>
-  <body class="h-full bg-gray-50">
+  <body class="h-full bg-gray-50" data-sveltekit-preload-data="hover">
     <div id="app">%sveltekit.body%</div>
   </body>
 </html>

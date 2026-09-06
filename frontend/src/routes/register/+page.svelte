@@ -64,12 +64,12 @@
       
       <form onsubmit={(e) => { e.preventDefault(); handleRegister(); }} class="space-y-3">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Nama Instansi <span class="text-red-500">*</span></label>
-          <input type="text" bind:value={form.nama_instansi} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" required />
+          <label for="rinst" class="block text-sm font-medium text-gray-700 mb-1">Nama Instansi <span class="text-red-500">*</span></label>
+          <input id="rinst" type="text" bind:value={form.nama_instansi} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" required />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Jenis Instansi <span class="text-red-500">*</span></label>
-          <select bind:value={form.jns_instansi} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+          <label for="rjns" class="block text-sm font-medium text-gray-700 mb-1">Jenis Instansi <span class="text-red-500">*</span></label>
+          <select id="rjns" bind:value={form.jns_instansi} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:ring-2 focus:ring-blue-500 outline-none">
             <option value="madrasah">Madrasah</option>
             <option value="kua">KUA</option>
             <option value="kemenag">Kantor Kemenag</option>
@@ -77,25 +77,25 @@
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Kabupaten <span class="text-red-500">*</span></label>
-            <input type="text" bind:value={form.kabupaten} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" required />
+            <label for="rkab" class="block text-sm font-medium text-gray-700 mb-1">Kabupaten <span class="text-red-500">*</span></label>
+            <input id="rkab" type="text" bind:value={form.kabupaten} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" required />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Provinsi <span class="text-red-500">*</span></label>
-            <input type="text" bind:value={form.provinsi} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" required />
+            <label for="rprov" class="block text-sm font-medium text-gray-700 mb-1">Provinsi <span class="text-red-500">*</span></label>
+            <input id="rprov" type="text" bind:value={form.provinsi} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" required />
           </div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Telepon</label>
-          <input type="text" bind:value={form.telepon} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
+          <label for="rtlp" class="block text-sm font-medium text-gray-700 mb-1">Telepon</label>
+          <input id="rtlp" type="text" bind:value={form.telepon} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Username <span class="text-red-500">*</span></label>
-          <input type="text" bind:value={form.username} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" required />
+          <label for="ruser" class="block text-sm font-medium text-gray-700 mb-1">Username <span class="text-red-500">*</span></label>
+          <input id="ruser" type="text" bind:value={form.username} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" required />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Password <span class="text-red-500">*</span></label>
-          <input type="password" bind:value={form.password} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" required />
+          <label for="rpass" class="block text-sm font-medium text-gray-700 mb-1">Password <span class="text-red-500">*</span></label>
+          <input id="rpass" type="password" bind:value={form.password} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" required />
         </div>
         <button type="submit" disabled={loading}
                 class="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-medium py-2.5 px-4 rounded-lg text-sm transition-colors">

@@ -35,38 +35,38 @@
 
 <Layout title="Profil" activePage="profil">
   <Breadcrumb items={[{ label: 'Beranda', href: '/dashboard' }, { label: 'Profil' }]} />
-  <div class="bg-white rounded-xl border border-gray-200 shadow-sm mb-4">
-    <div class="px-4 py-2.5 border-b border-gray-200 text-sm font-semibold text-gray-700">
-      <i class="fa-solid fa-circle-user mr-1"></i> Akun Saya
+  <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-2">
+    <div class="px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-700">
+      <i class="fa-solid fa-circle-user mr-0.5"></i> Akun Saya
     </div>
-    <div class="p-4 space-y-2">
-      <div class="flex justify-between text-sm">
+    <div class="p-2.5 space-y-1">
+      <div class="flex justify-between text-xs">
         <span class="text-gray-500">Username</span>
         <span class="font-semibold text-gray-900">{username}</span>
       </div>
-      <div class="flex justify-between text-sm">
+      <div class="flex justify-between text-xs">
         <span class="text-gray-500">Role</span>
         <span class="text-gray-900">{role}</span>
       </div>
     </div>
   </div>
   
-  <div class="bg-white rounded-xl border border-gray-200 shadow-sm">
-    <div class="px-4 py-2.5 border-b border-gray-200 text-sm font-semibold text-gray-700">
-      <i class="fa-solid fa-key mr-1"></i> Ganti Password
+  <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
+    <div class="px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-700">
+      <i class="fa-solid fa-key mr-0.5"></i> Ganti Password
     </div>
-    <div class="p-4 space-y-3">
+    <div class="p-2.5 space-y-2">
       <div>
-        <label for="old-pwd" class="block text-sm font-medium text-gray-700 mb-1">Password Lama</label>
-        <input id="old-pwd" type="password" bind:value={oldPwd} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Password saat ini" />
+        <label for="old-pwd" class="block text-[10px] font-medium text-gray-700 mb-0.5">Password Lama</label>
+        <input id="old-pwd" type="password" bind:value={oldPwd} class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Password saat ini" />
       </div>
       <div>
-        <label for="new-pwd" class="block text-sm font-medium text-gray-700 mb-1">Password Baru</label>
-        <input id="new-pwd" type="password" bind:value={newPwd} class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Minimal 4 karakter" />
+        <label for="new-pwd" class="block text-[10px] font-medium text-gray-700 mb-0.5">Password Baru</label>
+        <input id="new-pwd" type="password" bind:value={newPwd} class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Minimal 4 karakter" />
       </div>
       <button onclick={resetOwn}
-              class="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
-        <i class="fa-solid fa-check mr-1"></i> Simpan Password Baru
+              class="w-full px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-medium transition-colors">
+        <i class="fa-solid fa-check mr-0.5"></i> Simpan Password Baru
       </button>
     </div>
   </div>

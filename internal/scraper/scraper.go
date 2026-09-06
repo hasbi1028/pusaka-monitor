@@ -47,7 +47,8 @@ type ScrapeResult struct {
 
 // ScrapeToday — ambil presensi hari ini (WITA = UTC+8)
 func (c *PusakaClient) ScrapeToday() ScrapeResult {
-	now := time.Now()
+	c.report(1, "Mulai")
+	now := time.Now().UTC()
 	wita := now.Add(8 * time.Hour)
 	bulan := int(wita.Month())
 	tahun := wita.Year()
@@ -58,6 +59,7 @@ func (c *PusakaClient) ScrapeToday() ScrapeResult {
 		return ScrapeResult{Success: false, Tanggal: tglISO, Source: "http-api", Error: err.Error()}
 	}
 
+	c.report(7, "Cari data hari ini")
 	for _, r := range riwayat {
 		iso, ok := parseTanggalIndo(r.Tgl)
 		if ok && iso == tglISO {

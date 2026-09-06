@@ -8,7 +8,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 	"github.com/hasbiawal/pusaka-monitor/internal/backup"
 	"github.com/hasbiawal/pusaka-monitor/internal/config"
@@ -103,6 +105,9 @@ func main() {
 	// Router
 	r := gin.Default()
 
+	// Gzip compression — compress JSON/HTML/JS/CSS responses (skip pre-compressed assets)
+	r.Use(gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedPaths([]string{"/_app/immutable/"})))
+
 	// Health check (before NoRoute!)
 	r.GET("/health", func(c *gin.Context) {
 		// Check DB connection
@@ -135,8 +140,17 @@ func main() {
 		c.Next()
 	})
 
-	// Serve SvelteKit static assets
-	r.Static("/_app", "./frontend/build/_app")
+	// Serve SvelteKit static assets (single wildcard — Gin menolak
+	// dua catch-all tumpang-tindih seperti /_app/immutable/*f + /_app/*f)
+	r.GET("/_app/*filepath", func(c *gin.Context) {
+		fp := c.Param("filepath") // diawali "/" → "/immutable/xxx" atau "/manifest.js"
+		if strings.HasPrefix(fp, "/immutable/") {
+			c.Header("Cache-Control", "public, max-age=31536000, immutable")
+		} else {
+			c.Header("Cache-Control", "public, max-age=3600, must-revalidate")
+		}
+		c.File("./frontend/build/_app/" + fp)
+	})
 	r.StaticFile("/favicon.svg", "./frontend/build/favicon.svg")
 	// Legacy dist support (if any)
 	r.Static("/assets", "./frontend/dist/assets")
@@ -207,6 +221,9 @@ func main() {
 		auth.GET("/api/admin/recap/preview", recapHandler.Preview)
 		auth.POST("/api/admin/recap/send", recapHandler.SendNow)
 		auth.POST("/api/recap/test", recapHandler.TestSend)
+		auth.POST("/api/rekap/kirim-wa", recapHandler.SendWA)
+		auth.POST("/api/rekap/kirim-telegram", recapHandler.SendTelegram)
+		auth.GET("/api/admin/wa/groups", recapHandler.ListWAGroups)
 	}
 
 	// SPA fallback: serve 200.html for all non-API routes (SvelteKit SPA)

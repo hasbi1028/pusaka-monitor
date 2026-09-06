@@ -2,6 +2,7 @@ package handler
 
 import (
 	"log"
+	"math/rand"
 	"time"
 
 	"github.com/google/uuid"
@@ -9,10 +10,8 @@ import (
 
 	"github.com/hasbiawal/pusaka-monitor/internal/database"
 	"github.com/hasbiawal/pusaka-monitor/internal/models"
+	"github.com/hasbiawal/pusaka-monitor/internal/recap"
 )
-
-// lastRunHarian — catat tanggal terakhir tiap label jalan (guard anti-dobel)
-var lastRunHarian = map[string]string{}
 
 // StartScheduler — jalankan goroutine background:
 //  1. Recover job stale tiap 60 detik
@@ -48,7 +47,9 @@ func StartScheduler(db *gorm.DB) {
 	}()
 }
 
-// runSchedules — cek semua jadwal aktif dari DB, jalankan jika waktunya
+// runSchedules — cek semua jadwal aktif dari DB, jalankan jika waktunya.
+// Klaim atomik via kolom last_run: aman dari proses ganda & restart
+// (hanya 1 proses yang dapat RowsAffected=1 per jadwal per hari).
 func runSchedules(db *gorm.DB) {
 	wita := time.Now().UTC().Add(8 * time.Hour)
 	todayStr := wita.Format("2006-01-02")
@@ -56,18 +57,29 @@ func runSchedules(db *gorm.DB) {
 	currentMin := wita.Minute()
 
 	var schedules []models.Schedule
-	db.Where("aktif = 1").Find(&schedules)
+	db.Where("aktif = ?", true).Find(&schedules)
 
 	for _, s := range schedules {
 		if s.Jam == currentHour && s.Menit == currentMin {
-			// Guard harian: tiap ID cuma 1x/hari
-			runKey := s.ID
-			if lastRunHarian[runKey] == todayStr {
+			// Klaim atomik: hanya 1 proses yang menang per jadwal per hari
+			res := db.Model(&models.Schedule{}).
+				Where("id = ? AND (last_run IS NULL OR last_run <> ?)", s.ID, todayStr).
+				Update("last_run", todayStr)
+			if res.Error != nil || res.RowsAffected == 0 {
 				continue
 			}
-			lastRunHarian[runKey] = todayStr
-			log.Printf("[SCHEDULER] auto-scrape %s (%02d:%02d WITA, mode=%s)", s.Label, s.Jam, s.Menit, s.Mode)
-			autoScrapeByMode(db, s.Mode)
+			// Fuzzy start: tunda acak 0-90 detik agar tidak jalan tepat
+			// di detik :00 setiap hari (jadwal cron-tepat = ciri bot).
+			delay := time.Duration(rand.Intn(91)) * time.Second
+			log.Printf("[SCHEDULER] auto-scrape %s (%02d:%02d WITA, mode=%s) mulai dalam %ds",
+				s.Label, s.Jam, s.Menit, s.Mode, int(delay.Seconds()))
+			go func(sched models.Schedule, d time.Duration) {
+				time.Sleep(d)
+				autoScrapeByMode(db, sched.Mode)
+				// Setelah batch dibuat → tunggu habis lalu kirim rekap gambar
+				// Menggunakan per-schedule config (telegram_enabled, wa_enabled, wa_group)
+				recap.AfterScheduleBatch(db, sched.ID, sched.Label, todayStr, &sched)
+			}(s, delay)
 		}
 	}
 }
@@ -81,7 +93,7 @@ func databaseRecover(db *gorm.DB) int64 {
 func autoScrapeByMode(db *gorm.DB, mode string) {
 	today := todayWITA()
 	var pegawai []models.Pegawai
-	db.Where("aktif = 1 AND password_pusaka != ''").Find(&pegawai)
+	db.Where("aktif = ? AND password_pusaka != ''", true).Find(&pegawai)
 
 	created := 0
 	for _, p := range pegawai {

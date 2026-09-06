@@ -2,38 +2,29 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
+  import { auth } from '$lib/stores/auth.js';
   import '../app.css';
 
   let { children } = $props();
 
   const publicPaths = ['/login', '/register'];
 
-  // Auth state using $state rune
   let user = $state(null);
   let loading = $state(true);
   let isLoggedIn = $state(false);
 
-  async function checkAuth() {
-    try {
-      const res = await fetch('/api/auth/me');
-      if (res.ok) {
-        const data = await res.json();
-        if (data.success) {
-          user = data.data;
-          isLoggedIn = true;
-          loading = false;
-          return;
-        }
-      }
-      user = null;
-      isLoggedIn = false;
-      loading = false;
-    } catch {
-      user = null;
-      isLoggedIn = false;
-      loading = false;
-    }
-  }
+  onMount(() => {
+    // Use the auth store — single source of truth
+    const unsub = auth.subscribe(s => {
+      user = s.user;
+      isLoggedIn = s.isLoggedIn;
+      loading = s.loading;
+    });
+
+    auth.checkAuth();
+
+    return unsub;
+  });
 
   // Export for child components to use
   export function getAuth() {
@@ -41,13 +32,8 @@
   }
 
   export function logout() {
-    user = null;
-    isLoggedIn = false;
+    auth.logout();
   }
-
-  onMount(() => {
-    checkAuth();
-  });
 
   // Redirect based on auth state
   $effect(() => {

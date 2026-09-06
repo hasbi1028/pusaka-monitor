@@ -25,10 +25,13 @@ func (h *ScheduleHandler) List(c *gin.Context) {
 // POST /api/schedules
 func (h *ScheduleHandler) Create(c *gin.Context) {
 	var req struct {
-		Jam   int    `json:"jam" binding:"required,min=0,max=23"`
-		Menit int    `json:"menit" binding:"min=0,max=59"`
-		Label string `json:"label" binding:"required"`
-		Mode  string `json:"mode"`
+		Jam             int    `json:"jam" binding:"required,min=0,max=23"`
+		Menit           int    `json:"menit" binding:"min=0,max=59"`
+		Label           string `json:"label" binding:"required"`
+		Mode            string `json:"mode"`
+		TelegramEnabled *bool  `json:"telegram_enabled"`
+		WAEnabled       *bool  `json:"wa_enabled"`
+		WAGroup         string `json:"wa_group"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, models.ApiResponse{Error: "Jam (0-23), menit (0-59), dan label wajib diisi"})
@@ -37,13 +40,17 @@ func (h *ScheduleHandler) Create(c *gin.Context) {
 	if req.Mode == "" {
 		req.Mode = "all"
 	}
+
 	schedule := models.Schedule{
-		ID:    uuid.New().String(),
-		Jam:   req.Jam,
-		Menit: req.Menit,
-		Label: req.Label,
-		Aktif: true,
-		Mode:  req.Mode,
+		ID:              uuid.New().String(),
+		Jam:             req.Jam,
+		Menit:           req.Menit,
+		Label:           req.Label,
+		Aktif:           true,
+		Mode:            req.Mode,
+		TelegramEnabled: req.TelegramEnabled != nil && *req.TelegramEnabled,
+		WAEnabled:       req.WAEnabled == nil || *req.WAEnabled,
+		WAGroup:         req.WAGroup,
 	}
 	if err := h.DB.Create(&schedule).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, models.ApiResponse{Error: "Gagal membuat jadwal"})
@@ -61,11 +68,14 @@ func (h *ScheduleHandler) Update(c *gin.Context) {
 		return
 	}
 	var req struct {
-		Jam   *int    `json:"jam"`
-		Menit *int    `json:"menit"`
-		Label *string `json:"label"`
-		Aktif *bool   `json:"aktif"`
-		Mode  *string `json:"mode"`
+		Jam             *int    `json:"jam"`
+		Menit           *int    `json:"menit"`
+		Label           *string `json:"label"`
+		Aktif           *bool   `json:"aktif"`
+		Mode            *string `json:"mode"`
+		TelegramEnabled *bool   `json:"telegram_enabled"`
+		WAEnabled       *bool   `json:"wa_enabled"`
+		WAGroup         *string `json:"wa_group"`
 	}
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, models.ApiResponse{Error: "Format tidak valid"})
@@ -86,6 +96,15 @@ func (h *ScheduleHandler) Update(c *gin.Context) {
 	}
 	if req.Mode != nil {
 		updates["mode"] = *req.Mode
+	}
+	if req.TelegramEnabled != nil {
+		updates["telegram_enabled"] = *req.TelegramEnabled
+	}
+	if req.WAEnabled != nil {
+		updates["wa_enabled"] = *req.WAEnabled
+	}
+	if req.WAGroup != nil {
+		updates["wa_group"] = *req.WAGroup
 	}
 	updates["updated_at"] = time.Now()
 	h.DB.Model(&schedule).Updates(updates)

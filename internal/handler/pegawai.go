@@ -29,9 +29,9 @@ func (h *PegawaiHandler) List(c *gin.Context) {
 	instansiID, _ := c.Get("instansi_id")
 	role, _ := c.Get("role")
 
-	q := h.DB.Where("aktif = 1")
+	q := h.DB.Where("aktif = ?", true)
 	if role != "superadmin" && instansiID != "" {
-		q = h.DB.Where("instansi_id = ? AND aktif = 1", instansiID)
+		q = h.DB.Where("instansi_id = ? AND aktif = ?", instansiID, true)
 	}
 
 	var pegawai []models.Pegawai

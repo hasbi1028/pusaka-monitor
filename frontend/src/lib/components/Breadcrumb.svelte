@@ -2,7 +2,7 @@
   let { items = [] } = $props();
 </script>
 
-<nav class="flex items-center gap-1.5 text-xs text-gray-400 mb-4">
+<nav data-testid="breadcrumb" class="flex items-center gap-1 text-[10px] text-gray-400 mb-2">
   {#each items as item, i}
     {#if i > 0}
       <span class="text-gray-300">/</span>

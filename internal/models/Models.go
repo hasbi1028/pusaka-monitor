@@ -23,6 +23,11 @@ type Instansi struct {
 	JamPulangRam   string     `gorm:"default:15:30" json:"jam_pulang_ram"`
 	ToleransiRam   int        `gorm:"default:15" json:"toleransi_ram"`
 	ModeRamadan    bool       `gorm:"default:false" json:"mode_ramadan"`
+	// Grup WA tujuan rekap gambar harian (JID grup ...@g.us atau nomor 628xx).
+	// Kosong = pakai RECAP_GROUP dari env (fallback).
+	WaGroup        string     `gorm:"default:''" json:"wa_group"`
+	// RecapAktif — false = instansi ini dilewati saat kirim rekap harian.
+	RecapAktif     bool       `gorm:"default:true" json:"recap_aktif"`
 	ApprovedAt     *time.Time `json:"approved_at"`
 	RejectedAt     *time.Time `json:"rejected_at"`
 	RejectReason   string     `json:"reject_reason"`
@@ -83,6 +88,9 @@ type Job struct {
 	JamMasuk     string     `json:"jam_masuk"`
 	JamPulang    string     `json:"jam_pulang"`
 	WorkerID     string     `json:"worker_id"`
+	Progress     int        `gorm:"default:0" json:"progress"`
+	TotalSteps   int        `gorm:"default:10" json:"total_steps"`
+	StepLabel    string     `gorm:"default:''" json:"step_label"`
 	CreatedAt    time.Time  `json:"created_at"`
 	ClaimedAt    *time.Time `json:"claimed_at"`
 	CompletedAt  *time.Time `json:"completed_at"`
@@ -130,14 +138,25 @@ type Cuti struct {
 
 // Schedule — jadwal auto-scrape
 type Schedule struct {
-	ID        string    `gorm:"primaryKey" json:"id"`
-	Jam       int       `gorm:"not null" json:"jam"`        // 0-23
-	Menit     int       `gorm:"not null" json:"menit"`      // 0-59
-	Label     string    `gorm:"not null" json:"label"`      // e.g. "Pagi", "Sore"
-	Aktif     bool      `gorm:"default:true" json:"aktif"`
-	Mode      string    `gorm:"default:all" json:"mode"`    // all | belum_masuk | belum_pulang
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID              string    `gorm:"primaryKey" json:"id"`
+	Jam             int       `gorm:"not null" json:"jam"`        // 0-23
+	Menit           int       `gorm:"not null" json:"menit"`      // 0-59
+	Label           string    `gorm:"not null" json:"label"`      // e.g. "Pagi", "Sore"
+	Aktif           bool      `gorm:"default:true" json:"aktif"`
+	Mode            string    `gorm:"default:all" json:"mode"`    // all | belum_masuk | belum_pulang
+	TelegramEnabled bool      `gorm:"default:false" json:"telegram_enabled"`
+	WAEnabled       bool      `gorm:"default:true" json:"wa_enabled"`
+	WAGroup         string    `gorm:"default:''" json:"wa_group"` // per-schedule WA group override
+	LastRun         string    `gorm:"default:''" json:"last_run"` // YYYY-MM-DD terakhir jalan
+	CreatedAt       time.Time `json:"created_at"`
+	UpdatedAt       time.Time `json:"updated_at"`
+}
+
+// RecapLog — jejak rekap terkirim per jadwal per hari (anti-kirim-ganda)
+type RecapLog struct {
+	ScheduleID string    `gorm:"primaryKey" json:"schedule_id"`
+	Tanggal    string    `gorm:"primaryKey" json:"tanggal"` // YYYY-MM-DD
+	CreatedAt  time.Time `json:"created_at"`
 }
 
 // API Response
@@ -160,8 +179,9 @@ type RekapHarian struct {
 
 // JobStats
 type JobStats struct {
-	Pending int64 `json:"pending"`
-	Running int64 `json:"running"`
-	Done    int64 `json:"done"`
-	Failed  int64 `json:"failed"`
+	Pending   int64 `json:"pending"`
+	Running   int64 `json:"running"`
+	Done      int64 `json:"done"`
+	Failed    int64 `json:"failed"`
+	Cancelled int64 `json:"cancelled"`
 }

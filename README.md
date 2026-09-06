@@ -1,190 +1,119 @@
 # Pusaka Monitor
 
-Monitoring presensi Pusaka Kemenag secara real-time. Aplikasi ini HANYA membaca riwayat presensi dari Pusaka v3 — tidak mengubah atau membuat data di sistem Kemenag.
+Monitor kehadiran Pusaka Kemenag — web app untuk memantau absensi pegawai secara otomatis.
 
 ## Fitur
 
-- Dashboard harian & bulanan dengan statistik kehadiran
-- Scrape real-time (semua / belum masuk / belum pulang)
-- Auto-scrape terjadwal (DB-driven, configurable)
-- Worker pool concurrent (default 8, max 100)
-- Multi-tenant: setiap instansi punya data terpisah
-- Approval workflow: superadmin setujui pendaftaran instansi
-- Mode Ramadan: jam kerja otomatis berubah
-- Export CSV
-- Auto-backup database
+- 🔐 **Multi-tenant** — Tiap instansi punya data terpisah
+- 👥 **Role-based** — Superadmin, Admin Instansi
+- 📊 **Dashboard** — Real-time rekap kehadiran
+- 🔄 **Auto-scrape** — Jadwal otomatis ambil data dari Pusaka
+- 📱 **Mobile-first** — UI responsif untuk Android
+- 🔒 **AES-256-GCM** — Enkripsi password Pusaka
+- 🗄️ **PostgreSQL** — Database production-ready
 
 ## Tech Stack
 
-- **Backend:** Go + Gin + GORM + SQLite (WAL mode)
-- **Frontend:** SvelteKit 5 + Tailwind CSS v4
-- **Auth:** JWT + session DB (cookie-based)
-- **Security:** AES-256-GCM encryption untuk password Pusaka
+- **Backend**: Go + Gin + GORM
+- **Database**: PostgreSQL (production) / SQLite (development)
+- **Frontend**: SvelteKit 5 (adapter-static SPA)
+- **Auth**: JWT + session cookies
+- **Scraper**: HTTP client ke Pusaka v3 API
 
-## Quick Start (Docker)
+## Deploy ke DOM Cloud
+
+### Prerequisites
+
+1. Akun DOM Cloud (hasbi1028)
+2. PostgreSQL diaktifkan di portal
+3. Go 1.26+ terinstall
+
+### Steps
 
 ```bash
-# 1. Clone
-git clone https://github.com/hasbiawal/pusaka-monitor.git
-cd pusaka-monitor
+# 1. Cross-compile untuk Linux ARM64
+GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -buildvcs=false -o pusaka-monitor .
 
-# 2. Buat .env
+# 2. Upload ke DOM Cloud (zip atau git push)
+
+# 3. Set env vars di portal DOM Cloud:
+#    PORT=8080
+#    POSTGRES_HOST=localhost
+#    POSTGRES_PORT=5432
+#    POSTGRES_USER=postgres
+#    POSTGRES_PASSWORD=<your-password>
+#    POSTGRES_DB=pusaka_monitor
+#    JWT_SECRET=<random-48-char>
+#    SUPERADMIN_USERNAME=admin
+#    SUPERADMIN_PASSWORD=<secure>
+#    ENCRYPTION_KEY=<random-32-char>
+
+# 4. Set app_start_command: env PORT=$PORT ./pusaka-monitor
+
+# 5. Klik "Terapkan"
+```
+
+### Verifikasi
+
+```bash
+# Health check
+curl https://your-domain.sgp.dom.my.id/health
+
+# Response: {"status":"ok","database":"postgresql"}
+```
+
+## Local Development
+
+```bash
+# 1. Copy .env.example ke .env
 cp .env.example .env
-# Edit .env, isi JWT_SECRET dan SUPERADMIN_PASSWORD
 
-# 3. Build & Run
-docker compose up -d
+# 2. Edit .env (isi PostgreSQL credentials atau SQLite path)
+
+# 3. Build & run
+go build -o pusaka-monitor.exe .
+./pusaka-monitor.exe
 
 # 4. Buka http://localhost:8080
-# Login: admin / (password dari .env SUPERADMIN_PASSWORD)
 ```
 
-## Quick Start (Manual)
+## API Endpoints
 
-```bash
-# Prerequisites: Go 1.24+ dan Node.js 22+
+### Public
+- `POST /api/auth/login` — Login
+- `POST /api/auth/register` — Register instansi baru
+- `GET /health` — Health check
 
-# 1. Build frontend
-cd frontend && npm ci && npm run build && cd ..
+### Protected (butuh session cookie)
+- `GET /api/dashboard` — Dashboard hari ini
+- `GET /api/dashboard/bulan` — Rekap bulanan
+- `GET /api/pegawai` — List pegawai
+- `POST /api/scrape` — Trigger scrape
+- `GET /api/schedules` — List jadwal
 
-# 2. Build backend
-go build -o pusaka-monitor .
-
-# 3. Buat .env
-cp .env.example .env
-# Edit isi JWT_SECRET dan SUPERADMIN_PASSWORD
-
-# 4. Run
-./pusaka-monitor
-```
+### Superadmin
+- `GET /superadmin/approval` — List pending approval
+- `POST /api/approval/:id` — Approve/reject instansi
+- `POST /api/admin/concurrency` — Set worker concurrency
 
 ## Environment Variables
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `PORT` | No | `8080` | Port server |
-| `DB_PATH` | No | `data/presensi.db` | Path SQLite database |
-| `JWT_SECRET` | **YES** | - | Secret untuk signing JWT (min 32 karakter) |
-| `SUPERADMIN_PASSWORD` | **YES** | - | Password superadmin |
-| `SUPERADMIN_USERNAME` | No | `admin` | Username superadmin |
-| `ENCRYPTION_KEY` | No | (JWT_SECRET) | Key untuk encrypt password Pusaka (min 32 karakter) |
+| `PORT` | No | 8080 | Server port |
+| `DATABASE_URL` | No | - | PostgreSQL URL (overrides individual vars) |
+| `POSTGRES_HOST` | Yes* | localhost | PostgreSQL host |
+| `POSTGRES_PORT` | No | 5432 | PostgreSQL port |
+| `POSTGRES_USER` | Yes* | postgres | PostgreSQL user |
+| `POSTGRES_PASSWORD` | Yes* | - | PostgreSQL password |
+| `POSTGRES_DB` | No | pusaka_monitor | Database name |
+| `POSTGRES_SSLMODE` | No | disable | SSL mode |
+| `JWT_SECRET` | Yes | - | JWT signing secret (min 32 chars) |
+| `SUPERADMIN_USERNAME` | No | admin | Superadmin username |
+| `SUPERADMIN_PASSWORD` | Yes | - | Superadmin password |
+| `ENCRYPTION_KEY` | No | JWT_SECRET | AES encryption key (min 32 chars) |
 
-### Generate secrets
-
-```bash
-# JWT_SECRET
-python3 -c "import secrets; print(secrets.token_urlsafe(48))"
-
-# ENCRYPTION_KEY
-python3 -c "import secrets; print(secrets.token_urlsafe(32))"
-```
-
-## Bootstrap Superadmin
-
-```bash
-# Buat superadmin tanpa start server
-./pusaka-monitor --create-superadmin
-```
-
-## Konfigurasi
-
-### Jam Kerja
-
-- **Normal:** Jam masuk/pulang standar + toleransi telat (default 15 menit)
-- **Ramadan:** Jam masuk/pulang puasa + toleransi terpisah
-- Toggle mode Ramadan di Settings
-
-### Auto-Scrape
-
-Buat jadwal di Settings > Jadwal Auto Scrape:
-
-| Mode | Deskripsi |
-|------|-----------|
-| `all` | Scrape semua pegawai |
-| `belum_masuk` | Hanya yang belum ada data masuk |
-| `belum_pulang` | Hanya yang sudah masuk tapi belum pulang |
-
-### Worker Concurrency
-
-Atur jumlah worker paralel di Settings > Worker Scrape.
-
-- Default: 8 worker
-- Max: 100 worker
-- Rate limit Pusaka: 60 req/jam/NIP
-
-### Import Pegawai
-
-Format JSON untuk import:
-
-```json
-{
-  "format": "pusaka-monitor",
-  "total": 2,
-  "pegawai": [
-    {"nip": "199210282025211017", "nama": "Hasbi Awal", "password": "xxx", "aktif": true},
-    {"nip": "123456789012345678", "nama": "Budi Santoso", "password": "yyy", "aktif": true}
-  ]
-}
-```
-
-## Deployment
-
-### VPS (Linux)
-
-```bash
-# Build untuk Linux
-GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o pusaka-monitor .
-
-# Upload ke VPS
-scp pusaka-monitor user@vps:/app/
-
-# Setup systemd service
-sudo tee /etc/systemd/system/pusaka-monitor.service << 'EOF'
-[Unit]
-Description=Pusaka Monitor
-After=network.target
-
-[Service]
-Type=simple
-User=www-data
-WorkingDirectory=/app
-ExecStart=/app/pusaka-monitor
-Restart=always
-EnvironmentFile=/app/.env
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-sudo systemctl enable pusaka-monitor
-sudo systemctl start pusaka-monitor
-```
-
-### Reverse Proxy (Nginx)
-
-```nginx
-server {
-    listen 80;
-    server_name monitor.example.com;
-    return 301 https://$host$request_uri;
-}
-
-server {
-    listen 443 ssl http2;
-    server_name monitor.example.com;
-
-    ssl_certificate /etc/letsencrypt/live/monitor.example.com/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/monitor.example.com/privkey.pem;
-
-    location / {
-        proxy_pass http://127.0.0.1:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-}
-```
+*Required when `DATABASE_URL` is not set
 
 ## License
 

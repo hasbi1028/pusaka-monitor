@@ -30,6 +30,7 @@
     { href: '/scrape', page: 'scrape', icon: 'fa-rotate', label: 'Scrape' },
     { href: '/laporan', page: 'laporan', icon: 'fa-chart-bar', label: 'Laporan' },
     { href: '/settings', page: 'settings', icon: 'fa-gear', label: 'Pengaturan' },
+    { href: '/kepatuhan', page: 'kepatuhan', icon: 'fa-scale-balanced', label: 'Kepatuhan' },
     { href: '/superadmin/users', page: 'users', icon: 'fa-user-shield', label: 'User Mgmt', superadminOnly: true },
     { href: '/profil', page: 'profil', icon: 'fa-circle-user', label: 'Profil' }
   ];
@@ -45,39 +46,39 @@
 </script>
 
 {#if drawerOpen}
-  <div class="fixed inset-0 bg-black/50 z-40 lg:hidden" onclick={closeDrawer}></div>
+  <div class="fixed inset-0 bg-black/50 z-40 lg:hidden" onclick={closeDrawer} onkeydown={(e) => { if (e.key === 'Escape') closeDrawer(); }} role="presentation"></div>
 {/if}
 
 <!-- Sidebar Drawer (mobile) -->
-<aside class="fixed top-0 left-0 z-50 h-full w-64 bg-white border-r border-gray-200 transform transition-transform duration-200 lg:hidden"
+<aside class="fixed top-0 left-0 z-50 h-full w-56 bg-white border-r border-gray-200 transform transition-transform duration-200 lg:hidden"
        class:-translate-x-full={!drawerOpen}
        class:translate-x-0={drawerOpen}>
-  <div class="flex items-center justify-between p-4 border-b border-gray-200">
-    <div class="flex items-center gap-2">
-      <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-        <i class="fa-solid fa-shield-halved text-white text-sm"></i>
+  <div class="flex items-center justify-between px-3 py-2 border-b border-gray-200">
+    <div class="flex items-center gap-1.5">
+      <div class="w-7 h-7 bg-blue-600 rounded-md flex items-center justify-center">
+        <i class="fa-solid fa-shield-halved text-white text-xs"></i>
       </div>
       <div>
-        <div class="text-sm font-bold text-gray-900">Pusaka Monitor</div>
-        <div class="text-[10px] text-gray-400">Sistem Monitoring</div>
+        <div class="text-xs font-bold text-gray-900">Pusaka Monitor</div>
+        <div class="text-[9px] text-green-600 font-medium">Read-Only · Hanya Baca</div>
       </div>
     </div>
-    <button onclick={closeDrawer} class="p-1 rounded hover:bg-gray-100" aria-label="Close menu">
-      <i class="fa-solid fa-xmark text-gray-500"></i>
+    <button onclick={closeDrawer} class="p-0.5 rounded hover:bg-gray-100" aria-label="Close menu">
+      <i class="fa-solid fa-xmark text-gray-500 text-xs"></i>
     </button>
   </div>
-  <nav class="p-3 space-y-1">
-    {#each navItems as item}
+  <nav class="p-2 space-y-0.5">
+    {#each navItems as item (item.page)}
       <a href={item.href} onclick={closeDrawer}
-         class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors {navClass(item.page)}">
-        <i class="fa-solid {item.icon} w-5 text-center text-xs"></i>
+         class="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-colors {navClass(item.page)}">
+        <i class="fa-solid {item.icon} w-4 text-center text-[10px]"></i>
         <span>{item.label}</span>
       </a>
     {/each}
-    <div class="pt-2 mt-2 border-t border-gray-100">
+    <div class="pt-1.5 mt-1.5 border-t border-gray-100">
       <button onclick={handleLogout}
-              class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
-        <i class="fa-solid fa-right-from-bracket w-5 text-center text-xs"></i>
+              class="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-md text-xs font-medium text-red-600 hover:bg-red-50 transition-colors">
+        <i class="fa-solid fa-right-from-bracket w-4 text-center text-[10px]"></i>
         <span>Keluar</span>
       </button>
     </div>
@@ -85,33 +86,33 @@
 </aside>
 
 <!-- Sidebar Desktop (fixed) -->
-<aside class="hidden lg:flex lg:flex-col lg:w-56 lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 bg-white border-r border-gray-200">
-  <div class="flex items-center gap-2 p-4 border-b border-gray-200">
-    <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-      <i class="fa-solid fa-shield-halved text-white text-sm"></i>
+<aside class="hidden lg:flex lg:flex-col lg:w-48 lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 bg-white border-r border-gray-200">
+  <div class="flex items-center gap-1.5 px-3 py-2 border-b border-gray-200">
+    <div class="w-7 h-7 bg-blue-600 rounded-md flex items-center justify-center">
+      <i class="fa-solid fa-shield-halved text-white text-xs"></i>
     </div>
     <div>
-      <div class="text-sm font-bold text-gray-900">Pusaka Monitor</div>
-      <div class="text-[10px] text-gray-400">Monitoring Kehadiran</div>
+      <div class="text-xs font-bold text-gray-900">Pusaka Monitor</div>
+      <div class="text-[9px] text-green-600 font-medium">Read-Only · Hanya Baca</div>
     </div>
   </div>
-  <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
-    {#each navItems as item}
+  <nav class="flex-1 p-2 space-y-0.5 overflow-y-auto">
+    {#each navItems as item (item.page)}
       <a href={item.href}
-         class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors {navClass(item.page)}">
-        <i class="fa-solid {item.icon} w-5 text-center text-xs"></i>
+         class="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-colors {navClass(item.page)}">
+        <i class="fa-solid {item.icon} w-4 text-center text-[10px]"></i>
         <span>{item.label}</span>
       </a>
     {/each}
-    <div class="pt-2 mt-2 border-t border-gray-100">
+    <div class="pt-1.5 mt-1.5 border-t border-gray-100">
       <button onclick={handleLogout}
-              class="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors">
-        <i class="fa-solid fa-right-from-bracket w-5 text-center text-xs"></i>
+              class="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-md text-xs font-medium text-red-600 hover:bg-red-50 transition-colors">
+        <i class="fa-solid fa-right-from-bracket w-4 text-center text-[10px]"></i>
         <span>Keluar</span>
       </button>
     </div>
   </nav>
-  <div class="p-3 border-t border-gray-200 text-center text-[10px] text-gray-400">
-    v1.0 · Pusaka Kemenag
+  <div class="px-2 py-1.5 border-t border-gray-200 text-center text-[9px] text-gray-400">
+    v1.0.3 · Hanya membaca Pusaka
   </div>
 </aside>
