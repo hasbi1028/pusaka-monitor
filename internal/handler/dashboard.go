@@ -89,24 +89,51 @@ func (h *DashboardHandler) Dashboard(c *gin.Context) {
 	var absensi []models.Absensi
 	q.Order("nama").Find(&absensi)
 
-	// Query rekap TERPISAH (fresh scope)
-	rekapQ := h.DB
+	// Overlay cuti: pegawai yang cuti pada tanggal ini tampil "Cuti" (bukan alfa),
+	// walau baris absensinya dibuat sebelum cuti diset
+	cutiQ := h.DB.Model(&models.Cuti{}).
+		Where("tanggal_mulai <= ? AND tanggal_akhir >= ?", tanggal, tanggal)
 	if role != "superadmin" && instansiID != "" {
-		rekapQ = h.DB.Where("instansi_id = ? AND tanggal = ?", instansiID, tanggal)
-	} else {
-		rekapQ = h.DB.Where("tanggal = ?", tanggal)
+		cutiQ = cutiQ.Where("instansi_id = ?", instansiID)
+	}
+	var cutiRows []models.Cuti
+	cutiQ.Find(&cutiRows)
+	cutiSet := map[string]bool{}
+	for _, cr := range cutiRows {
+		cutiSet[cr.NIP] = true
+	}
+	for i := range absensi {
+		if cutiSet[absensi[i].NIP] && absensi[i].Status != "Cuti" {
+			absensi[i].Status = "Cuti"
+		}
 	}
 
+	// Rekap dihitung dari baris absensi YANG SUDAH di-overlay cuti di atas,
+	// agar angka kartu selalu konsisten dengan tabel (tidak ada query ganda).
 	var rekap models.RekapHarian
-	rekapQ.Model(&models.Absensi{}).
-		Select(`
-			COUNT(*) as total,
-			SUM(CASE WHEN jam_masuk IS NOT NULL AND jam_masuk != '-' AND jam_masuk != '' THEN 1 ELSE 0 END) as hadir,
-			SUM(CASE WHEN status = 'Terlambat' OR status = 'Telat Ringan' THEN 1 ELSE 0 END) as terlambat,
-			SUM(CASE WHEN (jam_masuk IS NULL OR jam_masuk = '-' OR jam_masuk = '') AND (jam_pulang IS NULL OR jam_pulang = '-' OR jam_pulang = '') THEN 1 ELSE 0 END) as tidak_hadir,
-			SUM(CASE WHEN status = 'Belum Masuk' THEN 1 ELSE 0 END) as belum_masuk,
-			SUM(CASE WHEN status = 'Belum Pulang' THEN 1 ELSE 0 END) as belum_pulang
-		`).Scan(&rekap)
+	rekap.Total = int64(len(absensi))
+	for i := range absensi {
+		a := &absensi[i]
+		if a.JamMasuk != "" && a.JamMasuk != "-" {
+			rekap.Hadir++
+		}
+		switch a.Status {
+		case "Terlambat", "Telat Ringan":
+			rekap.Terlambat++
+		case "Belum Masuk":
+			rekap.BelumMasuk++
+		case "Belum Pulang":
+			rekap.BelumPulang++
+		case "Cuti":
+			rekap.Cuti++
+		case "Libur":
+			rekap.Libur++
+		}
+		if (a.JamMasuk == "" || a.JamMasuk == "-") && (a.JamPulang == "" || a.JamPulang == "-") &&
+			a.Status != "Cuti" && a.Status != "Libur" {
+			rekap.TidakHadir++
+		}
+	}
 
 	resp := models.ApiResponse{
 		Success: true,
@@ -250,6 +277,8 @@ func (h *DashboardHandler) DashboardBulanPegawai(c *gin.Context) {
 		TidakHadir   int64   `gorm:"column:tidak_hadir" json:"tidak_hadir"`
 		BelumMasuk   int64   `gorm:"column:belum_masuk" json:"belum_masuk"`
 		BelumPulang  int64   `gorm:"column:belum_pulang" json:"belum_pulang"`
+		Cuti         int64   `gorm:"column:cuti" json:"cuti"`
+		Libur        int64   `gorm:"column:libur" json:"libur"`
 	}
 
 	var rekapRows []PegRekap
@@ -259,9 +288,11 @@ func (h *DashboardHandler) DashboardBulanPegawai(c *gin.Context) {
 			p.nama,
 			COALESCE(SUM(CASE WHEN a.jam_masuk IS NOT NULL AND a.jam_masuk != '-' AND a.jam_masuk != '' THEN 1 ELSE 0 END), 0) as hadir,
 			COALESCE(SUM(CASE WHEN a.status = 'Terlambat' OR a.status = 'Telat Ringan' THEN 1 ELSE 0 END), 0) as terlambat,
-			COALESCE(SUM(CASE WHEN (a.jam_masuk IS NULL OR a.jam_masuk = '-' OR a.jam_masuk = '') AND (a.jam_pulang IS NULL OR a.jam_pulang = '-' OR a.jam_pulang = '') THEN 1 ELSE 0 END), 0) as tidak_hadir,
+			COALESCE(SUM(CASE WHEN (a.jam_masuk IS NULL OR a.jam_masuk = '-' OR a.jam_masuk = '') AND (a.jam_pulang IS NULL OR a.jam_pulang = '-' OR a.jam_pulang = '') AND (a.status IS NULL OR a.status NOT IN ('Cuti','Libur')) THEN 1 ELSE 0 END), 0) as tidak_hadir,
 			COALESCE(SUM(CASE WHEN a.status = 'Belum Masuk' THEN 1 ELSE 0 END), 0) as belum_masuk,
-			COALESCE(SUM(CASE WHEN a.status = 'Belum Pulang' THEN 1 ELSE 0 END), 0) as belum_pulang
+			COALESCE(SUM(CASE WHEN a.status = 'Belum Pulang' THEN 1 ELSE 0 END), 0) as belum_pulang,
+			COALESCE(SUM(CASE WHEN a.status = 'Cuti' THEN 1 ELSE 0 END), 0) as cuti,
+			COALESCE(SUM(CASE WHEN a.status = 'Libur' THEN 1 ELSE 0 END), 0) as libur
 		FROM pegawais p
 		LEFT JOIN absensis a ON a.n_ip = p.n_ip AND a.tanggal LIKE ?` + ""
 
@@ -295,6 +326,8 @@ func (h *DashboardHandler) DashboardBulanPegawai(c *gin.Context) {
 			"tidak_hadir":  r.TidakHadir,
 			"belum_masuk":  r.BelumMasuk,
 			"belum_pulang": r.BelumPulang,
+			"cuti":         r.Cuti,
+			"libur":        r.Libur,
 			"persen":       persen,
 		})
 	}
@@ -332,7 +365,7 @@ func (h *DashboardHandler) DashboardBulanDetail(c *gin.Context) {
 	}
 
 	q := h.DB.Model(&models.Absensi{}).
-		Select("tanggal, nama, jam_masuk, jam_pulang, status").
+		Select("tanggal, n_ip, nama, jam_masuk, jam_pulang, status").
 		Order("tanggal DESC, nama")
 	if role != "superadmin" && instansiID != "" {
 		q = q.Where("instansi_id = ? AND tanggal LIKE ?", instansiID, pattern)
@@ -342,6 +375,31 @@ func (h *DashboardHandler) DashboardBulanDetail(c *gin.Context) {
 
 	var rows []models.Absensi
 	q.Scan(&rows)
+
+	// Overlay cuti: status jadi "Cuti" bila tanggal masuk rentang cuti pegawai
+	cq := h.DB.Model(&models.Cuti{}).
+		Where("tanggal_mulai LIKE ? OR tanggal_akhir LIKE ? OR (tanggal_mulai <= ? AND tanggal_akhir >= ?)",
+			pattern, pattern, pattern[:7]+"-31", pattern[:7]+"-01")
+	if role != "superadmin" && instansiID != "" {
+		cq = cq.Where("instansi_id = ?", instansiID)
+	}
+	var monthCuti []models.Cuti
+	cq.Find(&monthCuti)
+	if len(monthCuti) > 0 {
+		inRange := func(nip, tgl string) bool {
+			for _, cr := range monthCuti {
+				if cr.NIP == nip && cr.TanggalMulai <= tgl && tgl <= cr.TanggalAkhir {
+					return true
+				}
+			}
+			return false
+		}
+		for i := range rows {
+			if rows[i].Status != "Cuti" && inRange(rows[i].NIP, rows[i].Tanggal) {
+				rows[i].Status = "Cuti"
+			}
+		}
+	}
 
 	resp := models.ApiResponse{
 		Success: true,

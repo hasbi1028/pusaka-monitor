@@ -159,6 +159,16 @@ type RecapLog struct {
 	CreatedAt  time.Time `json:"created_at"`
 }
 
+// HariLibur — tanggal libur/red-tanggal spesifik per instansi.
+// InstansiID kosong ("") = berlaku global (semua instansi).
+type HariLibur struct {
+	ID         string    `gorm:"primaryKey" json:"id"`
+	InstansiID string    `gorm:"default:''" json:"instansi_id"`
+	Tanggal    string    `gorm:"not null" json:"tanggal"` // YYYY-MM-DD
+	Keterangan string    `json:"keterangan"`
+	CreatedAt  time.Time `json:"created_at"`
+}
+
 // API Response
 type ApiResponse struct {
 	Success bool        `json:"success"`
@@ -175,6 +185,8 @@ type RekapHarian struct {
 	TidakHadir int64 `json:"tidak_hadir"`
 	BelumMasuk int64 `json:"belum_masuk"`
 	BelumPulang int64 `json:"belum_pulang"`
+	Cuti       int64 `json:"cuti"`
+	Libur      int64 `json:"libur"`
 }
 
 // JobStats

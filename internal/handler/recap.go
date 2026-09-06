@@ -111,8 +111,7 @@ func (h *RecapHandler) kirimAll(c *gin.Context, via string, tanggal string) {
 				results = append(results, r)
 				continue
 			}
-			caption := fmt.Sprintf("Rekap %s\n%s\nHadir %d • Telat %d • Blm Masuk %d • Blm Pulang %d • Alfa %d",
-				ins.Nama, d.TanggalIndo, d.Hadir, d.Terlambat, d.BelumMasuk, d.BelumPulang, d.Alfa)
+			caption := recap.CaptionFor(ins.Nama, d)
 			if err := recap.SendTelegramPhoto(caption, png); err != nil {
 				r.Error = "gagal kirim Telegram: " + err.Error()
 				results = append(results, r)
@@ -179,8 +178,7 @@ func (h *RecapHandler) SendWA(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, models.ApiResponse{Error: "target grup WA belum diatur (RECAP_GROUP atau wa_group instansi)"})
 		return
 	}
-	caption := fmt.Sprintf("Rekap %s\n%s\nHadir %d • Telat %d • Blm Masuk %d • Blm Pulang %d • Alfa %d",
-		ins.Nama, d.TanggalIndo, d.Hadir, d.Terlambat, d.BelumMasuk, d.BelumPulang, d.Alfa)
+	caption := recap.CaptionFor(ins.Nama, d)
 	if err := recap.SendImage(target, caption, png); err != nil {
 		c.JSON(http.StatusOK, models.ApiResponse{Success: false, Error: "gagal kirim WA: " + err.Error()})
 		return
@@ -228,8 +226,7 @@ func (h *RecapHandler) SendTelegram(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, models.ApiResponse{Error: "gagal gambar: " + err.Error()})
 		return
 	}
-	caption := fmt.Sprintf("Rekap %s\n%s\nHadir %d • Telat %d • Blm Masuk %d • Blm Pulang %d • Alfa %d",
-		ins.Nama, d.TanggalIndo, d.Hadir, d.Terlambat, d.BelumMasuk, d.BelumPulang, d.Alfa)
+	caption := recap.CaptionFor(ins.Nama, d)
 	if err := recap.SendTelegramPhoto(caption, png); err != nil {
 		c.JSON(http.StatusOK, models.ApiResponse{Success: false, Error: "gagal kirim Telegram: " + err.Error()})
 		return
@@ -285,7 +282,7 @@ func (h *RecapHandler) TestSend(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, models.ApiResponse{Error: "gagal gambar: " + err.Error()})
 		return
 	}
-	caption := "[TES] Rekap " + ins.Nama + "\n" + d.TanggalIndo
+	caption := "[TES] " + recap.CaptionFor(ins.Nama, d)
 	if err := recap.SendImage(target, caption, png); err != nil {
 		c.JSON(http.StatusOK, models.ApiResponse{Success: false, Error: "gagal kirim WA: " + err.Error()})
 		return

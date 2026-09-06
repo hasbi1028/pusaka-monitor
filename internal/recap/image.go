@@ -22,12 +22,14 @@ var (
 	cOrange  = color.RGBA{234, 88, 12, 255}
 	cCyan    = color.RGBA{8, 145, 178, 255}
 	cRed     = color.RGBA{220, 38, 38, 255}
+	cPurple  = color.RGBA{147, 51, 234, 255}
 	cGrayBg  = color.RGBA{249, 250, 251, 255}
 	cChipBgG = color.RGBA{220, 252, 231, 255}
 	cChipBgY = color.RGBA{254, 249, 195, 255}
 	cChipBgR = color.RGBA{254, 226, 226, 255}
 	cChipBgO = color.RGBA{255, 237, 213, 255}
 	cChipBgC = color.RGBA{207, 250, 254, 255}
+	cChipBgP = color.RGBA{243, 232, 255, 255}
 	cChipBgX = color.RGBA{243, 244, 246, 255}
 )
 
@@ -83,10 +85,14 @@ func RenderPNG(d *Data) ([]byte, error) {
 	if err := loadFont(dc, false, 15); err != nil {
 		return nil, err
 	}
-	dc.DrawStringAnchored(d.TanggalIndo+"  •  Masuk "+d.JamMasukStd+"  •  Pulang "+d.JamPulangStd, imgW/2, 98, 0.5, 0.5)
+	sub := d.TanggalIndo + "  •  Masuk " + d.JamMasukStd + "  •  Pulang " + d.JamPulangStd
+	if d.IsLibur {
+		sub += "  •  LIBUR"
+	}
+	dc.DrawStringAnchored(sub, imgW/2, 98, 0.5, 0.5)
 	dc.DrawStringAnchored(fmt.Sprintf("Total %d pegawai", d.Total), imgW/2, 122, 0.5, 0.5)
 
-	// Stat cards (6 kotak)
+	// Stat cards (7 kotak)
 	stats := []struct {
 		label string
 		val   int
@@ -96,11 +102,12 @@ func RenderPNG(d *Data) ([]byte, error) {
 		{"TELAT", d.Terlambat, cYellow},
 		{"BLM MASUK", d.BelumMasuk, cOrange},
 		{"BLM PULANG", d.BelumPulang, cCyan},
+		{"CUTI", d.Cuti, cPurple},
 		{"ALFA", d.Alfa, cRed},
 		{"TOTAL", d.Total, cInk},
 	}
 	y0 := headerH + 10.0
-	cardW := (float64(imgW) - 20 - 5*8) / 6
+	cardW := (float64(imgW) - 20 - 6*8) / 7
 	for i, s := range stats {
 		x := 10 + float64(i)*(cardW+8)
 		dc.SetColor(cWhite)
@@ -205,6 +212,10 @@ func chipColor(s string) (color.RGBA, color.RGBA) {
 		return cChipBgC, cCyan
 	case "Belum Masuk":
 		return cChipBgO, cOrange
+	case "Cuti":
+		return cChipBgP, cPurple
+	case "Libur":
+		return cChipBgX, cMuted
 	default:
 		return cChipBgX, cMuted
 	}

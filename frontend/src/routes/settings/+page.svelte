@@ -3,7 +3,7 @@
   import Breadcrumb from '$lib/components/Breadcrumb.svelte';
   import Loading from '$lib/components/Loading.svelte';
   import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
-  import { superadmin, instansi, waGroups } from '$lib/api.js';
+  import { superadmin, instansi, waGroups, libur as liburApi } from '$lib/api.js';
   import { toasts } from '$lib/stores/toast.js';
   import { onMount } from 'svelte';
 
@@ -111,7 +111,63 @@
     } catch {}
   }
 
-  onMount(() => { loadData(); loadWAGroups(); });
+  // Hari libur state
+  const namaHari = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'];
+  let liburMingguan = $state([0]);
+  let liburTanggal = $state([]);
+  let liburSaving = $state(false);
+  let newLiburTgl = $state('');
+  let newLiburKet = $state('');
+
+  async function loadLibur() {
+    try {
+      const res = await liburApi.get();
+      if (res.success && res.data) {
+        liburMingguan = res.data.mingguan || [0];
+        liburTanggal = res.data.tanggal || [];
+      }
+    } catch {}
+  }
+
+  function toggleHariLibur(d) {
+    liburMingguan = liburMingguan.includes(d) ? liburMingguan.filter(x => x !== d) : [...liburMingguan, d];
+  }
+
+  async function saveLiburMingguan() {
+    liburSaving = true;
+    try {
+      const res = await liburApi.setMingguan(liburMingguan);
+      if (res.success) toasts.success('Hari libur mingguan disimpan');
+      else toasts.error(res.error || 'Gagal');
+    } catch { toasts.error('Gagal menyimpan'); }
+    liburSaving = false;
+  }
+
+  async function addLiburTanggal() {
+    if (!newLiburTgl) { toasts.warning('Pilih tanggal dulu'); return; }
+    try {
+      const res = await liburApi.addTanggal(newLiburTgl, newLiburKet);
+      if (res.success) {
+        toasts.success('Tanggal libur ditambahkan');
+        newLiburTgl = ''; newLiburKet = '';
+        loadLibur();
+      } else toasts.error(res.error || 'Gagal');
+    } catch { toasts.error('Gagal menyimpan'); }
+  }
+
+  async function delLiburTanggal(id, tgl) {
+    confirmTitle = 'Hapus hari libur?';
+    confirmMessage = 'Hapus ' + tgl + ' dari daftar libur?';
+    confirmAction = async () => {
+      confirmShow = false;
+      const res = await liburApi.delTanggal(id);
+      if (res.success) { toasts.success('Dihapus'); loadLibur(); }
+      else toasts.error(res.error || 'Gagal');
+    };
+    confirmShow = true;
+  }
+
+  onMount(() => { loadData(); loadWAGroups(); loadLibur(); });
 
   async function saveConc() {
     const n = parseInt(concInput) || 1;
@@ -499,6 +555,44 @@
                     </span>
                   {/if}
                 </div>
+              </div>
+            {/each}
+          </div>
+        {/if}
+      </div>
+    </div>
+
+    <!-- Hari Libur -->
+    <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-2">
+      <div class="px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-700"><i class="fa-solid fa-umbrella-beach mr-0.5"></i> Hari Libur</div>
+      <div class="p-2.5">
+        <div class="text-[10px] font-semibold text-gray-600 mb-1.5">Libur mingguan (auto-scrape dilewati)</div>
+        <div class="flex gap-1.5 flex-wrap mb-2">
+          {#each [0,1,2,3,4,5,6] as d (d)}
+            <button onclick={() => toggleHariLibur(d)}
+                    class="px-2.5 py-1 rounded-md text-xs font-medium border transition-colors {liburMingguan.includes(d) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200'}">
+              {namaHari[d]}
+            </button>
+          {/each}
+        </div>
+        <button onclick={saveLiburMingguan} disabled={liburSaving}
+                class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white rounded-md text-xs font-medium mb-3">
+          {liburSaving ? 'Menyimpan...' : 'Simpan Hari Libur'}
+        </button>
+        <div class="text-[10px] font-semibold text-gray-600 mb-1.5 border-t border-gray-100 pt-2">Tanggal merah / libur khusus</div>
+        <div class="flex gap-1.5 mb-2">
+          <input type="date" bind:value={newLiburTgl} aria-label="Tanggal libur" class="flex-1 px-2 py-1 border border-gray-300 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500" />
+          <input type="text" bind:value={newLiburKet} placeholder="Keterangan" class="flex-1 px-2 py-1 border border-gray-300 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500" />
+          <button onclick={addLiburTanggal} class="px-2.5 py-1 bg-green-600 hover:bg-green-700 text-white rounded-md text-xs" aria-label="Tambah libur"><i class="fa-solid fa-plus"></i></button>
+        </div>
+        {#if liburTanggal.length === 0}
+          <p class="text-xs text-gray-400 text-center py-2">Belum ada tanggal libur khusus</p>
+        {:else}
+          <div class="space-y-1">
+            {#each liburTanggal as l (l.id)}
+              <div class="flex items-center justify-between px-2 py-1 rounded-md border border-gray-100 text-xs">
+                <span class="font-medium text-gray-800">{l.tanggal}{#if l.keterangan}<span class="text-gray-400 font-normal"> — {l.keterangan}</span>{/if}</span>
+                <button onclick={() => delLiburTanggal(l.id, l.tanggal)} class="p-1 text-gray-400 hover:text-red-500" aria-label="Hapus"><i class="fa-solid fa-trash text-[10px]"></i></button>
               </div>
             {/each}
           </div>

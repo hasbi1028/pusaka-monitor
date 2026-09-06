@@ -322,13 +322,13 @@ func processJob(db *gorm.DB, job models.Job) {
 	// Jika data belum ada di Pusaka → cek dulu apakah hari libur
 	if !result.Success {
 		status := "Belum Masuk"
-		// Cek hari Minggu
-		if t, err := time.Parse("2006-01-02", today); err == nil && t.Weekday() == time.Sunday {
+		// Cek hari libur (mingguan instansi + tanggal merah)
+		if IsLibur(db, pegawai.InstansiID, today) {
 			status = "Libur"
 		}
 		// Cek cuti
 		var cutiCount int64
-		db.Model(&models.Cuti{}).Where("nip = ? AND tanggal_mulai <= ? AND tanggal_akhir >= ?",
+		db.Model(&models.Cuti{}).Where("n_ip = ? AND tanggal_mulai <= ? AND tanggal_akhir >= ?",
 			job.EmployeeID, today, today).Count(&cutiCount)
 		if cutiCount > 0 {
 			status = "Cuti"

@@ -96,7 +96,13 @@ func autoScrapeByMode(db *gorm.DB, mode string) {
 	db.Where("aktif = ? AND password_pusaka != ''", true).Find(&pegawai)
 
 	created := 0
+	skippedLibur := 0
 	for _, p := range pegawai {
+		// Lewati pegawai yang instansinya libur hari ini (mingguan/tanggal merah)
+		if IsLibur(db, p.InstansiID, today) {
+			skippedLibur++
+			continue
+		}
 		// Cek absensi hari ini
 		var existing models.Absensi
 		hasAbsen := db.Where("n_ip = ? AND instansi_id = ? AND tanggal = ?", p.NIP, p.InstansiID, today).First(&existing).Error == nil
@@ -125,7 +131,7 @@ func autoScrapeByMode(db *gorm.DB, mode string) {
 			created++
 		}
 	}
-	if created > 0 {
-		log.Printf("[SCHEDULER] auto-scrape: %d job dibuat (mode=%s)", created, mode)
+	if created > 0 || skippedLibur > 0 {
+		log.Printf("[SCHEDULER] auto-scrape: %d job dibuat, %d dilewati (libur) (mode=%s)", created, skippedLibur, mode)
 	}
 }

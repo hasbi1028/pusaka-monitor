@@ -3,7 +3,7 @@
   import Breadcrumb from '$lib/components/Breadcrumb.svelte';
   import Loading from '$lib/components/Loading.svelte';
   import ErrorState from '$lib/components/ErrorState.svelte';
-  import { dashboard, rekap as rekapApi, invalidateCache, prefetch } from '$lib/api.js';
+  import { dashboard, rekap as rekapApi, cuti as cutiApi, libur as liburApi, invalidateCache, prefetch } from '$lib/api.js';
   import { toasts } from '$lib/stores/toast.js';
 
   const bulanNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
@@ -24,8 +24,16 @@
   const yearRange = [thisYear - 1, thisYear, thisYear + 1];
 
   // Harian
-  let rekap = $state({ total: 0, hadir: 0, terlambat: 0, belum_masuk: 0, belum_pulang: 0, tidak_hadir: 0 });
+  let rekap = $state({ total: 0, hadir: 0, terlambat: 0, belum_masuk: 0, belum_pulang: 0, tidak_hadir: 0, cuti: 0, libur: 0 });
   let absensi = $state([]);
+  let isLiburHari = $state(false);
+
+  // Modal set cuti per pegawai
+  let cutiModal = $state(null); // { nip, nama }
+  let cutiMulai = $state('');
+  let cutiAkhir = $state('');
+  let cutiKet = $state('');
+  let cutiSaving = $state(false);
 
   // Bulanan
   let bulanMode = $state('rekap');
@@ -59,7 +67,7 @@
     try {
       const res = await dashboard.get(today);
       if (res.success) {
-        rekap = res.data.rekap;
+        rekap = { cuti: 0, libur: 0, ...res.data.rekap };
         absensi = res.data.absensi;
       } else {
         loadError = true;
@@ -68,6 +76,36 @@
       loadError = true;
     }
     loading = false;
+    try {
+      const lr = await liburApi.get(today);
+      isLiburHari = !!(lr.success && lr.data && lr.data.is_libur);
+    } catch { isLiburHari = false; }
+  }
+
+  function bukaCuti(a) {
+    cutiModal = { nip: a.nip, nama: a.nama };
+    cutiMulai = today;
+    cutiAkhir = today;
+    cutiKet = '';
+  }
+
+  async function simpanCuti() {
+    if (!cutiModal || !cutiMulai || !cutiAkhir) { toasts.error('Tanggal mulai & akhir wajib diisi'); return; }
+    cutiSaving = true;
+    try {
+      const res = await cutiApi.create({ nip: cutiModal.nip, tanggal_mulai: cutiMulai, tanggal_akhir: cutiAkhir, keterangan: cutiKet });
+      if (res.success) {
+        toasts.success(cutiModal.nama + ' ditandai cuti');
+        cutiModal = null;
+        invalidateCache('/api/dashboard');
+        setTimeout(loadDashboard, 1000);
+      } else {
+        toasts.error(res.error || 'Gagal menyimpan cuti');
+      }
+    } catch (e) {
+      toasts.error('Error: ' + e.message);
+    }
+    cutiSaving = false;
   }
 
   async function loadBulanPegawai() {
@@ -156,7 +194,7 @@
     </div>
     
     <!-- Stat Cards -->
-    <div class="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-2">
+    <div class="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-7 gap-2 mb-2">
       <div class="bg-white rounded-lg border border-gray-200 p-2 shadow-sm border-l-3 border-l-gray-400">
         <div class="text-base font-bold text-gray-900">{rekap.total}</div>
         <div class="text-[9px] text-gray-500 uppercase tracking-wide">Total</div>
@@ -181,7 +219,18 @@
         <div class="text-base font-bold text-red-600">{rekap.tidak_hadir}</div>
         <div class="text-[9px] text-gray-500 uppercase tracking-wide">Alfa</div>
       </div>
+      <div class="bg-white rounded-lg border border-gray-200 p-2 shadow-sm border-l-3 border-l-purple-500">
+        <div class="text-base font-bold text-purple-600">{rekap.cuti || 0}</div>
+        <div class="text-[9px] text-gray-500 uppercase tracking-wide">Cuti</div>
+      </div>
     </div>
+
+    {#if isLiburHari}
+      <div class="bg-blue-50 border border-blue-200 rounded-md px-2.5 py-1.5 mb-2 text-[10px] text-blue-800">
+        <i class="fa-solid fa-umbrella-beach mr-0.5"></i>
+        Hari libur — auto-scrape otomatis dilewati. Atur di Pengaturan &gt; Hari Libur.
+      </div>
+    {/if}
     
     <!-- Tab Switcher -->
     <div class="flex gap-1.5 mb-2">
@@ -248,11 +297,11 @@
         <div class="overflow-x-auto">
           <table class="w-full text-xs">
             <thead class="bg-gray-50 text-gray-500 text-[10px] uppercase">
-              <tr><th class="px-3 py-1.5 text-left">Nama</th><th class="px-3 py-1.5 text-center">Masuk</th><th class="px-3 py-1.5 text-center">Pulang</th><th class="px-3 py-1.5 text-center">Status</th></tr>
+              <tr><th class="px-3 py-1.5 text-left">Nama</th><th class="px-3 py-1.5 text-center">Masuk</th><th class="px-3 py-1.5 text-center">Pulang</th><th class="px-3 py-1.5 text-center">Status</th><th class="px-3 py-1.5 text-center">Aksi</th></tr>
             </thead>
             <tbody class="divide-y divide-gray-100">
               {#if absensi.length === 0}
-                <tr><td colspan="4" class="px-3 py-4 text-center text-gray-400 text-xs">Belum ada data</td></tr>
+                <tr><td colspan="5" class="px-3 py-4 text-center text-gray-400 text-xs">Belum ada data</td></tr>
               {:else}
                 {#each absensi as a (a.id)}
                   <tr class="hover:bg-gray-50">
@@ -263,6 +312,16 @@
                       <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium {statusBadge(a.status)}">
                         {a.status || (a.jam_masuk ? 'Hadir' : 'Alfa')}
                       </span>
+                    </td>
+                    <td class="px-3 py-1.5 text-center">
+                      {#if a.status !== 'Cuti' && a.status !== 'Libur'}
+                        <button onclick={() => bukaCuti(a)} title="Tandai cuti"
+                                class="px-1.5 py-0.5 border border-purple-200 text-purple-600 rounded text-[10px] hover:bg-purple-50 transition-colors">
+                          <i class="fa-solid fa-plane-departure"></i> Cuti
+                        </button>
+                      {:else}
+                        <span class="text-gray-300 text-[10px]">—</span>
+                      {/if}
                     </td>
                   </tr>
                 {/each}
@@ -348,7 +407,7 @@
               <div class="overflow-x-auto max-h-[50vh] overflow-y-auto">
                 <table class="w-full text-xs">
                   <thead class="bg-gray-50 text-gray-500 text-[10px] uppercase sticky top-0">
-                    <tr><th class="px-3 py-1.5 text-left">Nama</th><th class="px-3 py-1.5 text-center">Hadir</th><th class="px-3 py-1.5 text-center">Telat</th><th class="px-3 py-1.5 text-center">Alfa</th><th class="px-3 py-1.5 text-center">%</th></tr>
+                    <tr><th class="px-3 py-1.5 text-left">Nama</th><th class="px-3 py-1.5 text-center">Hadir</th><th class="px-3 py-1.5 text-center">Telat</th><th class="px-3 py-1.5 text-center">Alfa</th><th class="px-3 py-1.5 text-center">Cuti</th><th class="px-3 py-1.5 text-center">%</th></tr>
                   </thead>
                   <tbody class="divide-y divide-gray-100">
                     {#each rekapPegawai as r (r.nama)}
@@ -357,6 +416,7 @@
                         <td class="px-3 py-1.5 text-center text-green-600 font-medium">{r.hadir}</td>
                         <td class="px-3 py-1.5 text-center text-yellow-600">{r.terlambat}</td>
                         <td class="px-3 py-1.5 text-center text-red-600">{r.tidak_hadir}</td>
+                        <td class="px-3 py-1.5 text-center text-purple-600">{r.cuti || 0}</td>
                         <td class="px-3 py-1.5 text-center font-bold" class:text-green-600={r.persen >= 80} class:text-red-600={r.persen < 80}>
                           {r.persen.toFixed(0)}%
                         </td>
@@ -401,6 +461,28 @@
             </div>
           {/if}
         {/if}
+      </div>
+    {/if}
+    {#if cutiModal}
+      <div class="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50 p-3" onclick={() => cutiModal = null}>
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-sm p-4" onclick={(e) => e.stopPropagation()}>
+          <div class="text-sm font-semibold text-gray-800 mb-1">
+            <i class="fa-solid fa-plane-departure text-purple-600 mr-1"></i>Tandai Cuti
+          </div>
+          <div class="text-xs text-gray-600 mb-3">{cutiModal.nama} <span class="text-gray-400">({cutiModal.nip})</span></div>
+          <label class="block text-[11px] font-medium text-gray-600 mb-1">Mulai</label>
+          <input type="date" bind:value={cutiMulai} class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-xs mb-2 outline-none focus:ring-2 focus:ring-purple-500" />
+          <label class="block text-[11px] font-medium text-gray-600 mb-1">Sampai</label>
+          <input type="date" bind:value={cutiAkhir} class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-xs mb-2 outline-none focus:ring-2 focus:ring-purple-500" />
+          <label class="block text-[11px] font-medium text-gray-600 mb-1">Keterangan</label>
+          <input type="text" bind:value={cutiKet} placeholder="cth: Cuti tahunan" class="w-full px-2 py-1.5 border border-gray-300 rounded-md text-xs mb-3 outline-none focus:ring-2 focus:ring-purple-500" />
+          <div class="flex gap-2 justify-end">
+            <button onclick={() => cutiModal = null} class="px-3 py-1.5 border border-gray-300 rounded-md text-xs text-gray-600 hover:bg-gray-50">Batal</button>
+            <button onclick={simpanCuti} disabled={cutiSaving} class="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 disabled:bg-purple-300 text-white rounded-md text-xs font-medium">
+              {cutiSaving ? 'Menyimpan...' : 'Simpan Cuti'}
+            </button>
+          </div>
+        </div>
       </div>
     {/if}
   {/if}

@@ -156,6 +156,21 @@ export const rekap = {
   }
 };
 
+// Cuti
+export const cuti = {
+  list: (tanggal) => request('/api/cuti?tanggal=' + tanggal),
+  create: (data) => request('/api/cuti', { method: 'POST', body: JSON.stringify(data) }),
+  remove: (id) => request('/api/cuti/' + id, { method: 'DELETE' })
+};
+
+// Hari libur
+export const libur = {
+  get: (tanggal) => request('/api/libur' + (tanggal ? '?tanggal=' + tanggal : '')),
+  setMingguan: (hari) => request('/api/libur/mingguan', { method: 'PUT', body: JSON.stringify({ hari }) }),
+  addTanggal: (tanggal, keterangan) => request('/api/libur/tanggal', { method: 'POST', body: JSON.stringify({ tanggal, keterangan }) }),
+  delTanggal: (id) => request('/api/libur/tanggal/' + id, { method: 'DELETE' })
+};
+
 // ─── Prefetch utility (requestIdleCallback) ──────────────────────────────────
 // Prefetch data during browser idle time — makes navigation feel instant
 const _prefetched = new Set();

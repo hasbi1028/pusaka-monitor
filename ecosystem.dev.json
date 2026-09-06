@@ -1,0 +1,39 @@
+{
+  "apps": [
+    {
+      "name": "pusaka-monitor-dev",
+      "script": "go",
+      "args": "run .",
+      "cwd": "C:\\Users\\LENOVO\\webapp\\pusaka-monitor",
+      "exec_mode": "fork",
+      "interpreter": "none",
+      "windowsHide": true,
+      "autorestart": true,
+      "max_restarts": 10,
+      "restart_delay": 5000,
+      "min_uptime": "30s",
+      "env": { "PORT": "8091", "GIN_MODE": "debug" },
+      "error_file": "C:\\Users\\LENOVO\\webapp\\pusaka-monitor\\logs\\dev-error.log",
+      "out_file": "C:\\Users\\LENOVO\\webapp\\pusaka-monitor\\logs\\dev-out.log",
+      "merge_logs": true,
+      "time": true
+    },
+    {
+      "name": "pusaka-monitor-frontend",
+      "script": "cmd",
+      "args": "/c npm run dev",
+      "cwd": "C:\\Users\\LENOVO\\webapp\\pusaka-monitor\\frontend",
+      "exec_mode": "fork",
+      "interpreter": "none",
+      "windowsHide": true,
+      "autorestart": true,
+      "max_restarts": 10,
+      "restart_delay": 5000,
+      "min_uptime": "10s",
+      "error_file": "C:\\Users\\LENOVO\\webapp\\pusaka-monitor\\logs\\dev-frontend-error.log",
+      "out_file": "C:\\Users\\LENOVO\\webapp\\pusaka-monitor\\logs\\dev-frontend-out.log",
+      "merge_logs": true,
+      "time": true
+    }
+  ]
+}

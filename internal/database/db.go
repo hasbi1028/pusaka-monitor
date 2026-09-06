@@ -75,6 +75,7 @@ func Init(dbURL string) *gorm.DB {
 		&models.Schedule{},
 		&models.RecapLog{},
 		&models.Cuti{},
+		&models.HariLibur{},
 	)
 	if err != nil {
 		log.Fatal("Failed to migrate database:", err)

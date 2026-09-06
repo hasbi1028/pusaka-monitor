@@ -152,8 +152,7 @@ func SendDailyRecaps(db *gorm.DB, tanggal string, overrideGroup ...string) []Res
 			results = append(results, r)
 			continue
 		}
-		caption := fmt.Sprintf("Rekap %s\n%s\nHadir %d • Telat %d • Blm Masuk %d • Blm Pulang %d • Alfa %d",
-			ins.Nama, d.TanggalIndo, d.Hadir, d.Terlambat, d.BelumMasuk, d.BelumPulang, d.Alfa)
+		caption := CaptionFor(ins.Nama, d)
 		if err := SendImage(r.Target, caption, png); err != nil {
 			r.Error = "gagal kirim WA: " + err.Error()
 			results = append(results, r)
@@ -190,8 +189,7 @@ func SendDailyRecapsTelegram(db *gorm.DB, tanggal string) []Result {
 			results = append(results, r)
 			continue
 		}
-		caption := fmt.Sprintf("Rekap %s\n%s\nHadir %d • Telat %d • Blm Masuk %d • Blm Pulang %d • Alfa %d",
-			ins.Nama, d.TanggalIndo, d.Hadir, d.Terlambat, d.BelumMasuk, d.BelumPulang, d.Alfa)
+		caption := CaptionFor(ins.Nama, d)
 		if err := SendTelegramPhoto(caption, png); err != nil {
 			r.Error = "gagal kirim Telegram: " + err.Error()
 			results = append(results, r)

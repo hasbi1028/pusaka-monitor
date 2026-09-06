@@ -101,6 +101,8 @@ func main() {
 	scheduleHandler := &handler.ScheduleHandler{DB: db}
 	instansiHandler := &handler.InstansiHandler{DB: db}
 	recapHandler := &handler.RecapHandler{DB: db}
+	liburHandler := &handler.LiburHandler{DB: db}
+	cutiHandler := &handler.CutiHandler{DB: db}
 
 	// Router
 	r := gin.Default()
@@ -174,6 +176,15 @@ func main() {
 		auth.POST("/api/admin/users/:id/reset-password", authHandler.AdminResetPassword)
 		auth.POST("/api/superadmin/users/:id/reset-password", authHandler.SuperadminResetPassword)
 		auth.GET("/api/superadmin/users", authHandler.ListUsers)
+
+		auth.GET("/api/libur", liburHandler.Get)
+		auth.PUT("/api/libur/mingguan", liburHandler.SetMingguan)
+		auth.POST("/api/libur/tanggal", liburHandler.AddTanggal)
+		auth.DELETE("/api/libur/tanggal/:id", liburHandler.DeleteTanggal)
+
+		auth.GET("/api/cuti", cutiHandler.List)
+		auth.POST("/api/cuti", cutiHandler.Create)
+		auth.DELETE("/api/cuti/:id", cutiHandler.Delete)
 
 		// Dashboard API
 		auth.GET("/api/dashboard", dashboardHandler.Dashboard)

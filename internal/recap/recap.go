@@ -29,6 +29,9 @@ type Data struct {
 	BelumMasuk   int
 	BelumPulang  int
 	Alfa         int
+	Cuti         int
+	Libur        int
+	IsLibur      bool // true bila tanggal adalah hari libur
 	Rows         []Row
 }
 
@@ -57,8 +60,33 @@ func Build(db *gorm.DB, instansiID, tanggal string) (*Data, error) {
 		JamPulangStd: ins.JamPulang,
 		Total:        len(list),
 	}
+	// Resolve status: Libur > Cuti > hasil scrape (sama dengan dashboard).
+	libur := isLibur(db, instansiID, tanggal)
+	d.IsLibur = libur
+	cuti := map[string]string{}
+	if !libur {
+		cuti = cutiSet(db, instansiID, tanggal)
+	}
 	empty := func(s string) bool { return s == "" || s == "-" }
 	for _, a := range list {
+		if libur {
+			a.Status = "Libur"
+			d.Libur++
+			d.Rows = append(d.Rows, Row{
+				Nama: a.Nama, JamMasuk: orDash(a.JamMasuk),
+				JamPulang: orDash(a.JamPulang), Status: a.Status,
+			})
+			continue
+		}
+		if _, ok := cuti[a.NIP]; ok {
+			a.Status = "Cuti"
+			d.Cuti++
+			d.Rows = append(d.Rows, Row{
+				Nama: a.Nama, JamMasuk: orDash(a.JamMasuk),
+				JamPulang: orDash(a.JamPulang), Status: a.Status,
+			})
+			continue
+		}
 		masuk := empty(a.JamMasuk)
 		pulang := empty(a.JamPulang)
 		switch {
