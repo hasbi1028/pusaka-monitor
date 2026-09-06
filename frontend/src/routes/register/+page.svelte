@@ -1,6 +1,7 @@
 <script>
   import { goto } from '$app/navigation';
   import { toasts } from '$lib/stores/toast.js';
+  import Icon from '$lib/components/Icon.svelte';
 
   let form = $state({
     nama_instansi: '',
@@ -45,7 +46,7 @@
     <div class="bg-white rounded-2xl shadow-2xl p-8">
       <div class="text-center mb-6">
         <div class="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <i class="fa-solid fa-user-plus text-blue-600 text-2xl"></i>
+          <Icon name="user-plus" class="text-blue-600 text-2xl" />
         </div>
         <h1 class="text-xl font-bold text-gray-900">Daftar Akun Baru</h1>
         <p class="text-sm text-gray-500 mt-1">Isi data instansi Anda</p>
@@ -53,12 +54,12 @@
       
       {#if error}
         <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex items-center gap-2">
-          <i class="fa-solid fa-circle-exclamation"></i><span>{error}</span>
+          <Icon name="circle-exclamation" /><span>{error}</span>
         </div>
       {/if}
       {#if success}
         <div class="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 flex items-center gap-2">
-          <i class="fa-solid fa-circle-check"></i><span>{success}</span>
+          <Icon name="circle-check" /><span>{success}</span>
         </div>
       {/if}
       

@@ -4,6 +4,7 @@
   import Loading from '$lib/components/Loading.svelte';
   import { superadmin } from '$lib/api.js';
   import { toasts } from '$lib/stores/toast.js';
+  import Icon from '$lib/components/Icon.svelte';
 
   let users = $state([]);
   let loading = $state(true);
@@ -52,7 +53,7 @@
   <Breadcrumb items={[{ label: 'Beranda', href: '/dashboard' }, { label: 'Users' }]} />
   <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
     <div class="px-4 py-2.5 border-b border-gray-200 text-sm font-semibold text-gray-700">
-      <i class="fa-solid fa-users mr-1"></i> Daftar User
+      <Icon name="users" class="mr-1" /> Daftar User
     </div>
     <div class="overflow-x-auto">
     {#if loading}
@@ -77,7 +78,7 @@
               <td class="px-4 py-2 text-right">
                 <button onclick={() => openReset(u.id, u.username)}
                         class="px-3 py-1 border border-gray-200 rounded-lg text-xs font-medium hover:bg-gray-50 transition-colors">
-                  <i class="fa-solid fa-key mr-1"></i>Reset
+                  <Icon name="key" class="mr-1" />Reset
                 </button>
               </td>
             </tr>
@@ -96,7 +97,7 @@
     <div class="absolute inset-0 bg-black/50" onclick={closeReset} role="presentation"></div>
     <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-4 relative z-10">
       <button onclick={closeReset} class="absolute top-2 right-2 p-0.5 rounded-md hover:bg-gray-100 text-gray-400" aria-label="Tutup">
-        <i class="fa-solid fa-xmark text-xs"></i>
+        <Icon name="xmark" class="text-xs" />
       </button>
       <h3 class="text-sm font-semibold text-gray-900 mb-0.5">Reset Password</h3>
       <p class="text-[10px] text-gray-500 mb-3">Password baru untuk <strong>{resetUsername}</strong></p>

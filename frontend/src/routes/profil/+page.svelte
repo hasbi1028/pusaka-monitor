@@ -3,6 +3,7 @@
   import Breadcrumb from '$lib/components/Breadcrumb.svelte';
   import { toasts } from '$lib/stores/toast.js';
   import { onMount } from 'svelte';
+  import Icon from '$lib/components/Icon.svelte';
 
   let username = $state('-');
   let role = $state('-');
@@ -37,7 +38,7 @@
   <Breadcrumb items={[{ label: 'Beranda', href: '/dashboard' }, { label: 'Profil' }]} />
   <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-2">
     <div class="px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-700">
-      <i class="fa-solid fa-circle-user mr-0.5"></i> Akun Saya
+      <Icon name="circle-user" class="mr-0.5" /> Akun Saya
     </div>
     <div class="p-2.5 space-y-1">
       <div class="flex justify-between text-xs">
@@ -53,7 +54,7 @@
   
   <div class="bg-white rounded-lg border border-gray-200 shadow-sm">
     <div class="px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-700">
-      <i class="fa-solid fa-key mr-0.5"></i> Ganti Password
+      <Icon name="key" class="mr-0.5" /> Ganti Password
     </div>
     <div class="p-2.5 space-y-2">
       <div>
@@ -66,7 +67,7 @@
       </div>
       <button onclick={resetOwn}
               class="w-full px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-medium transition-colors">
-        <i class="fa-solid fa-check mr-0.5"></i> Simpan Password Baru
+        <Icon name="check" class="mr-0.5" /> Simpan Password Baru
       </button>
     </div>
   </div>

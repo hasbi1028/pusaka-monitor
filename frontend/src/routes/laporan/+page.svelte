@@ -5,6 +5,7 @@
   import { dashboard } from '$lib/api.js';
   import { toasts } from '$lib/stores/toast.js';
   import { onMount } from 'svelte';
+  import Icon from '$lib/components/Icon.svelte';
 
   const bulanNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
@@ -143,7 +144,7 @@
     </div>
     <div class="flex-1"></div>
     <button onclick={exportCSV} class="px-2 py-1 bg-green-600 text-white text-[10px] font-medium rounded-md hover:bg-green-700">
-      <i class="fa-solid fa-download mr-0.5"></i> Export CSV
+      <Icon name="download" class="mr-0.5" /> Export CSV
     </button>
   </div>
 
@@ -162,7 +163,7 @@
     <!-- Donut + Jam Kerja -->
     <div class="grid md:grid-cols-3 gap-2 mb-2">
       <div class="bg-white rounded-lg border p-3">
-        <h3 class="text-xs font-semibold text-gray-700 mb-2"><i class="fa-solid fa-chart-pie mr-0.5"></i> Ringkasan Status</h3>
+        <h3 class="text-xs font-semibold text-gray-700 mb-2"><Icon name="chart-pie" class="mr-0.5" /> Ringkasan Status</h3>
         <div class="flex items-center gap-4">
           <div class="relative w-24 h-24">
             <svg viewBox="0 0 36 36" class="w-24 h-24 -rotate-90">
@@ -182,7 +183,7 @@
         </div>
       </div>
       <div class="bg-white rounded-lg border p-3">
-        <h3 class="text-xs font-semibold text-gray-700 mb-2"><i class="fa-solid fa-clock mr-0.5"></i> Jam Kerja</h3>
+        <h3 class="text-xs font-semibold text-gray-700 mb-2"><Icon name="clock" class="mr-0.5" /> Jam Kerja</h3>
         <div class="space-y-1 text-xs">
           <div class="flex justify-between"><span class="text-gray-500">Jam Masuk</span><span class="font-semibold">{settings.jam_masuk || '-'}</span></div>
           <div class="flex justify-between"><span class="text-gray-500">Jam Pulang</span><span class="font-semibold">{settings.jam_pulang || '-'}</span></div>
@@ -195,7 +196,7 @@
     <!-- Tabel Rekap -->
     <div class="bg-white rounded-lg border shadow-sm">
       <div class="px-3 py-2 border-b border-gray-200 flex items-center justify-between">
-        <h3 class="text-xs font-semibold text-gray-700"><i class="fa-solid fa-table mr-0.5"></i> Rekap Per Pegawai <span class="text-gray-400 font-normal">({filteredPegawai.length} pegawai)</span></h3>
+        <h3 class="text-xs font-semibold text-gray-700"><Icon name="table" class="mr-0.5" /> Rekap Per Pegawai <span class="text-gray-400 font-normal">({filteredPegawai.length} pegawai)</span></h3>
         <div class="flex items-center gap-1.5 text-[10px] text-gray-500">
           <span>Baris:</span>
           <select bind:value={perPage} onchange={() => page = 1} class="px-1.5 py-0.5 border rounded text-[10px]">

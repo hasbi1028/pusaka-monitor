@@ -3,6 +3,7 @@
   import Topbar from './Topbar.svelte';
   import BottomNav from './BottomNav.svelte';
   import Toast from './Toast.svelte';
+  import Icon from '$lib/components/Icon.svelte';
 
   let { title = '', activePage = '', children } = $props();
 
@@ -17,7 +18,7 @@
     {@render children()}
   </main>
   <footer class="px-3 py-2 text-center text-[9px] text-gray-400 border-t border-gray-100">
-    <i class="fa-solid fa-shield-halved mr-0.5"></i>
+    <Icon name="shield-halved" class="mr-0.5" />
     Pusaka Monitor <strong class="text-gray-500">hanya membaca</strong> riwayat Pusaka Kemenag — tidak membuat/mengubah absen.
     <a href="/kepatuhan" class="text-blue-500 hover:underline ml-1">Kepatuhan</a>
   </footer>

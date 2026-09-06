@@ -6,6 +6,7 @@
   import { scrape } from '$lib/api.js';
   import { toasts } from '$lib/stores/toast.js';
   import { onMount, onDestroy } from 'svelte';
+  import Icon from '$lib/components/Icon.svelte';
 
   let stats = $state({ pending: 0, running: 0, done: 0, failed: 0, cancelled: 0 });
   let jobs = $state([]);
@@ -48,13 +49,13 @@
   // Seksi kategori ala gambar referensi: Berjalan > Menunggu > Selesai > Gagal
   let collapsed = $state({});
   let sections = $derived([
-    { key: 'running', label: 'Berjalan', icon: 'fa-solid fa-spinner fa-spin', head: 'bg-cyan-50 text-cyan-700', chip: jobBadge('running'), count: stats.running || 0,
+    { key: 'running', label: 'Berjalan', icon: 'spinner', spin: true, head: 'bg-cyan-50 text-cyan-700', chip: jobBadge('running'), count: stats.running || 0,
       list: filteredJobs.filter(j => j.status === 'running') },
-    { key: 'pending', label: 'Menunggu', icon: 'fa-solid fa-clock', head: 'bg-gray-100 text-gray-700', chip: jobBadge('pending'), count: stats.pending || 0,
+    { key: 'pending', label: 'Menunggu', icon: 'clock', spin: false, head: 'bg-gray-100 text-gray-700', chip: jobBadge('pending'), count: stats.pending || 0,
       list: filteredJobs.filter(j => j.status === 'pending') },
-    { key: 'done', label: 'Selesai', icon: 'fa-solid fa-circle-check', head: 'bg-green-50 text-green-700', chip: jobBadge('done'), count: stats.done || 0,
+    { key: 'done', label: 'Selesai', icon: 'circle-check', spin: false, head: 'bg-green-50 text-green-700', chip: jobBadge('done'), count: stats.done || 0,
       list: filteredJobs.filter(j => j.status === 'done') },
-    { key: 'fail', label: 'Gagal & Batal', icon: 'fa-solid fa-triangle-exclamation', head: 'bg-red-50 text-red-700', chip: jobBadge('failed'), count: (stats.failed || 0) + (stats.cancelled || 0),
+    { key: 'fail', label: 'Gagal & Batal', icon: 'triangle-exclamation', spin: false, head: 'bg-red-50 text-red-700', chip: jobBadge('failed'), count: (stats.failed || 0) + (stats.cancelled || 0),
       list: filteredJobs.filter(j => j.status === 'failed' || j.status === 'cancelled') },
   ]);
 
@@ -225,7 +226,7 @@
       {#if busyAction === 'create-all'}
         <Loading variant="button" label="Membuat job..." />
       {:else}
-        <i class="fa-solid fa-bolt mr-0.5"></i> Scrape Semua
+        <Icon name="bolt" class="mr-0.5" /> Scrape Semua
       {/if}
     </button>
     <div class="grid grid-cols-2 gap-1.5">
@@ -234,7 +235,7 @@
         {#if busyAction === 'create-belum_masuk'}
           <Loading variant="button" size="sm" label="..." />
         {:else}
-          <i class="fa-solid fa-clock mr-0.5"></i> Belum Masuk
+          <Icon name="clock" class="mr-0.5" /> Belum Masuk
         {/if}
       </button>
       <button onclick={() => createJobs('belum_pulang')} disabled={busyAction}
@@ -242,7 +243,7 @@
         {#if busyAction === 'create-belum_pulang'}
           <Loading variant="button" size="sm" label="..." />
         {:else}
-          <i class="fa-solid fa-clock mr-0.5"></i> Belum Pulang
+          <Icon name="clock" class="mr-0.5" /> Belum Pulang
         {/if}
       </button>
     </div>
@@ -275,7 +276,7 @@
       {#if busyAction === 'retry'}
         <Loading variant="button" label="..." />
       {:else}
-        <i class="fa-solid fa-rotate mr-0.5"></i> Retry Gagal
+        <Icon name="rotate" class="mr-0.5" /> Retry Gagal
       {/if}
     </button>
     <button onclick={cancelAll} disabled={busyAction}
@@ -283,7 +284,7 @@
       {#if busyAction === 'cancel-all'}
         <Loading variant="button" label="Membatalkan..." />
       {:else}
-        <i class="fa-solid fa-circle-xmark mr-0.5"></i> Cancel All
+        <Icon name="circle-xmark" class="mr-0.5" /> Cancel All
       {/if}
     </button>
   </div>
@@ -291,7 +292,7 @@
   <!-- Jobs Table -->
   <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
     <div class="px-3 py-1.5 border-b border-gray-200 flex items-center justify-between">
-      <span class="text-xs font-semibold text-gray-700"><i class="fa-solid fa-list-check mr-0.5"></i> Antrian Job</span>
+      <span class="text-xs font-semibold text-gray-700"><Icon name="list-check" class="mr-0.5" /> Antrian Job</span>
       <span class="flex items-center gap-1.5">
         {#if live}
           <span class="inline-flex items-center gap-1 text-[10px] font-medium text-green-700"><span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>Live</span>
@@ -321,11 +322,11 @@
         {#each sections as sec (sec.key)}
           <button onclick={() => collapsed[sec.key] = !collapsed[sec.key]}
                   class="w-full flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold {sec.head} border-b border-gray-200 sticky top-0 z-10">
-            <i class="{sec.icon} text-[10px]"></i>
+            <Icon name={sec.icon} spin={sec.spin} class="text-[10px]" />
             {sec.label}
             <span class="bg-white/70 rounded-full px-1.5 text-[10px]">{sec.count}</span>
             <span class="flex-1"></span>
-            <i class="fa-solid {collapsed[sec.key] ? 'fa-chevron-down' : 'fa-chevron-up'} text-[10px] opacity-60"></i>
+            <Icon name={collapsed[sec.key] ? 'chevron-down' : 'chevron-up'} class="text-[10px] opacity-60" />
           </button>
           {#if !collapsed[sec.key]}
             {#each sec.list as j (j.id)}
@@ -353,7 +354,7 @@
                   {/if}
                   {#if j.status === 'pending' || j.status === 'running'}
                     <button onclick={() => cancelOne(j.id)} class="mt-0.5 p-0.5 rounded hover:bg-red-50 text-red-500" title="Batalkan">
-                      <i class="fa-solid fa-xmark text-[10px]"></i>
+                      <Icon name="xmark" class="text-[10px]" />
                     </button>
                   {/if}
                 </div>

@@ -5,6 +5,7 @@
   import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
   import { approval } from '$lib/api.js';
   import { toasts } from '$lib/stores/toast.js';
+  import Icon from '$lib/components/Icon.svelte';
 
   let pending = $state([]);
   let recent = $state([]);
@@ -82,7 +83,7 @@
 
 <Layout title="Approval" activePage="settings">
   <Breadcrumb items={[{ label: 'Beranda', href: '/dashboard' }, { label: 'Approval' }]} />
-  <h3 class="text-sm font-semibold text-gray-500 mb-3"><i class="fa-solid fa-hourglass-half mr-1"></i> Menunggu Persetujuan</h3>
+  <h3 class="text-sm font-semibold text-gray-500 mb-3"><Icon name="hourglass-half" class="mr-1" /> Menunggu Persetujuan</h3>
   {#if loading}
     <Loading variant="spinner" size="sm" label="Memuat pengajuan..." />
   {:else}
@@ -103,7 +104,7 @@
             {#if busyId === item.id}
               <Loading variant="button" label="Menyetujui..." />
             {:else}
-              <i class="fa-solid fa-check mr-1"></i>Setujui
+              <Icon name="check" class="mr-1" />Setujui
             {/if}
           </button>
           <button onclick={() => reject(item.id)} disabled={busyId === item.id}
@@ -111,14 +112,14 @@
             {#if busyId === item.id}
               <Loading variant="button" label="Menolak..." />
             {:else}
-              <i class="fa-solid fa-xmark mr-1"></i>Tolak
+              <Icon name="xmark" class="mr-1" />Tolak
             {/if}
           </button>
         </div>
       </div>
     {:else}
       <div class="bg-green-50 border border-green-200 rounded-xl p-4 text-center text-green-700 text-sm">
-        <i class="fa-solid fa-circle-check mr-1"></i> Tidak ada pendaftaran menunggu
+        <Icon name="circle-check" class="mr-1" /> Tidak ada pendaftaran menunggu
       </div>
     {/each}
   </div>
@@ -126,7 +127,7 @@
   
   <hr class="border-gray-200 mb-4" />
   
-  <h3 class="text-sm font-semibold text-gray-500 mb-3"><i class="fa-solid fa-clock-rotate-left mr-1"></i> Riwayat</h3>
+  <h3 class="text-sm font-semibold text-gray-500 mb-3"><Icon name="clock-rotate-left" class="mr-1" /> Riwayat</h3>
   <div class="space-y-2">
     {#each recent as item (item.id)}
       <div class="bg-white rounded-xl border border-gray-200 shadow-sm px-4 py-2.5 flex items-center justify-between">

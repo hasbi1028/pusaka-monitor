@@ -1,5 +1,6 @@
 <script>
   import { goto } from '$app/navigation';
+  import Icon from '$lib/components/Icon.svelte';
 
   let username = $state('');
   let password = $state('');
@@ -35,7 +36,7 @@
     <div class="bg-white rounded-xl shadow-2xl p-5">
       <div class="text-center mb-4">
         <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-          <i class="fa-solid fa-shield-halved text-blue-600 text-lg"></i>
+          <Icon name="shield-halved" class="text-blue-600 text-lg" />
         </div>
         <h1 class="text-base font-bold text-gray-900">Pusaka Monitor</h1>
         <p class="text-[10px] text-gray-500 mt-0.5">Masuk ke akun Anda</p>
@@ -43,7 +44,7 @@
       
       {#if error}
         <div class="mb-3 p-2 bg-red-50 border border-red-200 rounded-md text-[10px] text-red-700 flex items-center gap-1.5">
-          <i class="fa-solid fa-circle-exclamation"></i>
+          <Icon name="circle-exclamation" />
           <span>{error}</span>
         </div>
       {/if}
@@ -74,7 +75,7 @@
     </div>
     
     <p class="text-center text-[9px] text-blue-200 mt-2 px-3 leading-relaxed">
-      <i class="fa-solid fa-shield-halved"></i>
+      <Icon name="shield-halved" />
       Aplikasi <strong>READ-ONLY</strong>: hanya membaca riwayat Pusaka Kemenag.<br />
       Tidak membuat / mengubah absen — bukan alat absen fiktif.
     </p>

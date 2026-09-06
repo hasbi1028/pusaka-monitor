@@ -2,6 +2,7 @@
   import { goto } from '$app/navigation';
   import { onMount } from 'svelte';
   import { theme } from '../stores/theme.js';
+  import Icon from '$lib/components/Icon.svelte';
 
   let { activePage = '' } = $props();
   let drawerOpen = $state(false);
@@ -27,14 +28,14 @@
 
   // All nav items
   const allNavItems = [
-    { href: '/dashboard', page: 'dashboard', icon: 'fa-house', label: 'Beranda' },
-    { href: '/pegawai', page: 'pegawai', icon: 'fa-users', label: 'Pegawai' },
-    { href: '/scrape', page: 'scrape', icon: 'fa-rotate', label: 'Scrape' },
-    { href: '/laporan', page: 'laporan', icon: 'fa-chart-bar', label: 'Laporan' },
-    { href: '/settings', page: 'settings', icon: 'fa-gear', label: 'Pengaturan' },
-    { href: '/kepatuhan', page: 'kepatuhan', icon: 'fa-scale-balanced', label: 'Kepatuhan' },
-    { href: '/superadmin/users', page: 'users', icon: 'fa-user-shield', label: 'User Mgmt', superadminOnly: true },
-    { href: '/profil', page: 'profil', icon: 'fa-circle-user', label: 'Profil' }
+    { href: '/dashboard', page: 'dashboard', icon: 'house', label: 'Beranda' },
+    { href: '/pegawai', page: 'pegawai', icon: 'users', label: 'Pegawai' },
+    { href: '/scrape', page: 'scrape', icon: 'rotate', label: 'Scrape' },
+    { href: '/laporan', page: 'laporan', icon: 'chart-bar', label: 'Laporan' },
+    { href: '/settings', page: 'settings', icon: 'gear', label: 'Pengaturan' },
+    { href: '/kepatuhan', page: 'kepatuhan', icon: 'scale-balanced', label: 'Kepatuhan' },
+    { href: '/superadmin/users', page: 'users', icon: 'user-shield', label: 'User Mgmt', superadminOnly: true },
+    { href: '/profil', page: 'profil', icon: 'circle-user', label: 'Profil' }
   ];
 
   // Filter based on role
@@ -58,7 +59,7 @@
   <div class="flex items-center justify-between px-3 py-2 border-b border-gray-200 dark:border-slate-700">
     <div class="flex items-center gap-1.5">
       <div class="w-7 h-7 bg-gradient-to-br from-blue-600 to-blue-900 dark:from-blue-500 dark:to-blue-950 rounded-md flex items-center justify-center">
-        <i class="fa-solid fa-shield-halved text-white text-xs"></i>
+        <Icon name="shield-halved" class="text-white text-xs" />
       </div>
       <div>
         <div class="text-xs font-bold text-gray-900">Pusaka Monitor</div>
@@ -66,14 +67,14 @@
       </div>
     </div>
     <button onclick={closeDrawer} class="p-0.5 rounded hover:bg-gray-100" aria-label="Close menu">
-      <i class="fa-solid fa-xmark text-gray-500 text-xs"></i>
+      <Icon name="xmark" class="text-gray-500 text-xs" />
     </button>
   </div>
   <nav class="p-2 space-y-0.5">
     {#each navItems as item (item.page)}
       <a href={item.href} onclick={closeDrawer}
          class="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-colors {navClass(item.page)}">
-        <i class="fa-solid {item.icon} w-4 text-center text-[10px]"></i>
+        <Icon name={item.icon} class="w-4 text-center text-[10px]" />
         <span>{item.label}</span>
       </a>
     {/each}
@@ -81,12 +82,12 @@
       <button onclick={() => theme.toggle()}
               class="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-md text-xs font-medium text-gray-600 hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-slate-700 transition-colors"
               aria-label="Ganti mode gelap terang">
-        <i class="fa-solid {$theme === 'dark' ? 'fa-sun' : 'fa-moon'} w-4 text-center text-[10px]"></i>
+        <Icon name={$theme === 'dark' ? 'sun' : 'moon'} class="w-4 text-center text-[10px]" />
         <span>{$theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}</span>
       </button>
       <button onclick={handleLogout}
               class="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-md text-xs font-medium text-red-600 hover:bg-red-50 transition-colors">
-        <i class="fa-solid fa-right-from-bracket w-4 text-center text-[10px]"></i>
+        <Icon name="right-from-bracket" class="w-4 text-center text-[10px]" />
         <span>Keluar</span>
       </button>
     </div>
@@ -97,7 +98,7 @@
 <aside class="hidden lg:flex lg:flex-col lg:w-48 lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 bg-white dark:bg-slate-800 border-r border-gray-200 dark:border-slate-700">
   <div class="flex items-center gap-1.5 px-3 py-2 border-b border-gray-200 dark:border-slate-700">
     <div class="w-7 h-7 bg-gradient-to-br from-blue-600 to-blue-900 dark:from-blue-500 dark:to-blue-950 rounded-md flex items-center justify-center">
-      <i class="fa-solid fa-shield-halved text-white text-xs"></i>
+      <Icon name="shield-halved" class="text-white text-xs" />
     </div>
     <div>
       <div class="text-xs font-bold text-gray-900">Pusaka Monitor</div>
@@ -108,7 +109,7 @@
     {#each navItems as item (item.page)}
       <a href={item.href}
          class="flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-colors {navClass(item.page)}">
-        <i class="fa-solid {item.icon} w-4 text-center text-[10px]"></i>
+        <Icon name={item.icon} class="w-4 text-center text-[10px]" />
         <span>{item.label}</span>
       </a>
     {/each}
@@ -116,12 +117,12 @@
       <button onclick={() => theme.toggle()}
               class="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-md text-xs font-medium text-gray-600 hover:bg-gray-100 dark:text-slate-300 dark:hover:bg-slate-700 transition-colors"
               aria-label="Ganti mode gelap terang">
-        <i class="fa-solid {$theme === 'dark' ? 'fa-sun' : 'fa-moon'} w-4 text-center text-[10px]"></i>
+        <Icon name={$theme === 'dark' ? 'sun' : 'moon'} class="w-4 text-center text-[10px]" />
         <span>{$theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}</span>
       </button>
       <button onclick={handleLogout}
               class="flex items-center gap-2 w-full px-2.5 py-1.5 rounded-md text-xs font-medium text-red-600 hover:bg-red-50 transition-colors">
-        <i class="fa-solid fa-right-from-bracket w-4 text-center text-[10px]"></i>
+        <Icon name="right-from-bracket" class="w-4 text-center text-[10px]" />
         <span>Keluar</span>
       </button>
     </div>

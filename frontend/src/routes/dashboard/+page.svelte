@@ -5,6 +5,7 @@
   import ErrorState from '$lib/components/ErrorState.svelte';
   import { dashboard, rekap as rekapApi, cuti as cutiApi, libur as liburApi, invalidateCache, prefetch } from '$lib/api.js';
   import { toasts } from '$lib/stores/toast.js';
+  import Icon from '$lib/components/Icon.svelte';
 
   const bulanNames = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
   let loading = $state(true);
@@ -188,7 +189,7 @@
   {:else}
     <!-- Marquee Banner -->
     <div class="bg-green-50 border border-green-200 rounded-md px-2.5 py-1.5 mb-2 text-[10px] text-green-800">
-      <i class="fa-solid fa-shield-halved mr-0.5"></i>
+      <Icon name="shield-halved" class="mr-0.5" />
       <strong>READ-ONLY:</strong> hanya membaca riwayat Pusaka Kemenag — tidak membuat/mengubah absen.
       <a href="/kepatuhan" class="underline ml-1">Kepatuhan</a>
     </div>
@@ -227,7 +228,7 @@
 
     {#if isLiburHari}
       <div class="bg-blue-50 border border-blue-200 rounded-md px-2.5 py-1.5 mb-2 text-[10px] text-blue-800">
-        <i class="fa-solid fa-umbrella-beach mr-0.5"></i>
+        <Icon name="umbrella-beach" class="mr-0.5" />
         Hari libur — auto-scrape otomatis dilewati. Atur di Pengaturan &gt; Hari Libur.
       </div>
     {/if}
@@ -239,14 +240,14 @@
               class:bg-blue-600={mode === 'harian'} class:text-white={mode === 'harian'}
               class:bg-white={mode !== 'harian'} class:text-gray-600={mode !== 'harian'}
               class:border={mode !== 'harian'} class:border-gray-200={mode !== 'harian'}>
-        <i class="fa-solid fa-calendar-day mr-0.5"></i>Harian
+        <Icon name="calendar-day" class="mr-0.5" />Harian
       </button>
       <button onclick={() => setMode('bulanan')}
               class="px-3 py-1 rounded-md text-xs font-medium transition-colors"
               class:bg-blue-600={mode === 'bulanan'} class:text-white={mode === 'bulanan'}
               class:bg-white={mode !== 'bulanan'} class:text-gray-600={mode !== 'bulanan'}
               class:border={mode !== 'bulanan'} class:border-gray-200={mode !== 'bulanan'}>
-        <i class="fa-solid fa-calendar mr-0.5"></i>Bulanan
+        <Icon name="calendar" class="mr-0.5" />Bulanan
       </button>
     </div>
     
@@ -259,14 +260,14 @@
                  class="px-2 py-1 border border-gray-300 rounded-md text-xs focus:ring-2 focus:ring-blue-500 outline-none" />
           <button onclick={loadDashboard} aria-label="Cari"
                   class="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs transition-colors">
-            <i class="fa-solid fa-magnifying-glass text-[10px]"></i>
+            <Icon name="magnifying-glass" class="text-[10px]" />
           </button>
         </div>
       </div>
       <!-- Kirim Rekap Buttons -->
       <div class="bg-white rounded-lg border border-gray-200 shadow-sm p-2.5 mb-2">
         <div class="flex items-center gap-2 flex-wrap">
-          <span class="text-xs font-medium text-gray-700"><i class="fa-solid fa-paper-plane mr-0.5"></i> Kirim Rekap:</span>
+          <span class="text-xs font-medium text-gray-700"><Icon name="paper-plane" class="mr-0.5" /> Kirim Rekap:</span>
           <button onclick={() => kirimRekap('wa')}
                   disabled={kirimLoading}
                   class="px-3 py-1.5 bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white rounded-md text-xs font-medium transition-colors flex items-center gap-1">
@@ -274,7 +275,7 @@
               <div class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
               Mengirim...
             {:else}
-              <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp
+              <Icon name="whatsapp" class="text-sm" /> WhatsApp
             {/if}
           </button>
           <button onclick={() => kirimRekap('telegram')}
@@ -284,14 +285,14 @@
               <div class="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
               Mengirim...
             {:else}
-              <i class="fa-brands fa-telegram text-sm"></i> Telegram
+              <Icon name="telegram" class="text-sm" /> Telegram
             {/if}
           </button>
         </div>
       </div>
       <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
         <div class="px-3 py-2 border-b border-gray-200 flex items-center justify-between">
-          <span class="text-xs font-semibold text-gray-700"><i class="fa-solid fa-table mr-0.5"></i> Presensi</span>
+          <span class="text-xs font-semibold text-gray-700"><Icon name="table" class="mr-0.5" /> Presensi</span>
           <span class="bg-gray-100 text-gray-600 text-[10px] font-medium px-1.5 py-0.5 rounded-full">{absensi.length}</span>
         </div>
         <div class="overflow-x-auto">
@@ -317,7 +318,7 @@
                       {#if a.status !== 'Cuti' && a.status !== 'Libur'}
                         <button onclick={() => bukaCuti(a)} title="Tandai cuti"
                                 class="px-1.5 py-0.5 border border-purple-200 text-purple-600 rounded text-[10px] hover:bg-purple-50 transition-colors">
-                          <i class="fa-solid fa-plane-departure"></i> Cuti
+                          <Icon name="plane-departure" /> Cuti
                         </button>
                       {:else}
                         <span class="text-gray-300 text-[10px]">—</span>
@@ -356,7 +357,7 @@
               </select>
               <button onclick={exportCSV}
                       class="px-2 py-1 border border-gray-300 rounded-md text-xs hover:bg-gray-50 transition-colors">
-                <i class="fa-solid fa-download mr-0.5"></i>CSV
+                <Icon name="download" class="mr-0.5" />CSV
               </button>
             </div>
           </div>
@@ -402,7 +403,7 @@
             </div>
             <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
               <div class="px-3 py-2 border-b border-gray-200 text-xs font-semibold text-gray-700">
-                <i class="fa-solid fa-users mr-0.5"></i> Rekap per Pegawai
+                <Icon name="users" class="mr-0.5" /> Rekap per Pegawai
               </div>
               <div class="overflow-x-auto max-h-[50vh] overflow-y-auto">
                 <table class="w-full text-xs">
@@ -429,7 +430,7 @@
           {:else}
             <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
               <div class="px-3 py-2 border-b border-gray-200 text-xs font-semibold text-gray-700 flex items-center justify-between">
-                <span><i class="fa-solid fa-list-ul mr-0.5"></i> Detail Harian</span>
+                <span><Icon name="list-ul" class="mr-0.5" /> Detail Harian</span>
                 <span class="text-[10px] font-normal text-gray-400">{detailHarian.length} baris</span>
               </div>
               {#if detailHarian.length === 0}
@@ -467,7 +468,7 @@
       <div class="fixed inset-0 bg-black/40 flex items-end sm:items-center justify-center z-50 p-3" onclick={() => cutiModal = null}>
         <div class="bg-white rounded-lg shadow-lg w-full max-w-sm p-4" onclick={(e) => e.stopPropagation()}>
           <div class="text-sm font-semibold text-gray-800 mb-1">
-            <i class="fa-solid fa-plane-departure text-purple-600 mr-1"></i>Tandai Cuti
+            <Icon name="plane-departure" class="text-purple-600 mr-1" />Tandai Cuti
           </div>
           <div class="text-xs text-gray-600 mb-3">{cutiModal.nama} <span class="text-gray-400">({cutiModal.nip})</span></div>
           <label class="block text-[11px] font-medium text-gray-600 mb-1">Mulai</label>

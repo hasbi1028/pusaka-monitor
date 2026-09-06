@@ -6,6 +6,7 @@
   import { superadmin, instansi, waGroups, libur as liburApi } from '$lib/api.js';
   import { toasts } from '$lib/stores/toast.js';
   import { onMount } from 'svelte';
+  import Icon from '$lib/components/Icon.svelte';
 
   let concInput = $state(8);
   let fileInput;
@@ -314,7 +315,7 @@
   <Breadcrumb items={[{ label: 'Beranda', href: '/dashboard' }, { label: 'Pengaturan' }]} />
   <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-2">
     <div class="px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-700">
-      <i class="fa-solid fa-id-badge mr-0.5"></i> Info Akun
+      <Icon name="id-badge" class="mr-0.5" /> Info Akun
     </div>
     <div class="p-2.5 space-y-1">
       <div class="flex justify-between text-xs">
@@ -332,7 +333,7 @@
   <!-- Rekap Harian (instansi sendiri) -->
   <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-2">
     <div class="px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-700">
-      <i class="fa-solid fa-image mr-0.5"></i> Rekap Harian (Gambar WA)
+      <Icon name="image" class="mr-0.5" /> Rekap Harian (Gambar WA)
     </div>
     <div class="p-2.5">
       <div class="flex items-center justify-between mb-2">
@@ -354,7 +355,7 @@
     <!-- Rekap per Instansi -->
     <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-2">
       <div class="px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-700">
-        <i class="fa-solid fa-building mr-0.5"></i> Rekap per Instansi
+        <Icon name="building" class="mr-0.5" /> Rekap per Instansi
       </div>
       <div class="p-2.5 space-y-1.5">
         {#if instansiList.length === 0}
@@ -374,13 +375,13 @@
     <!-- Jam Kerja -->
     <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-2">
       <div class="px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-700">
-        <i class="fa-solid fa-clock mr-0.5"></i> Jam Kerja
+        <Icon name="clock" class="mr-0.5" /> Jam Kerja
       </div>
       <div class="p-2.5">
         <div class="grid md:grid-cols-2 gap-2.5 mb-2.5">
           <div class="bg-gray-50 rounded-md p-2">
             <div class="text-[10px] font-semibold text-gray-600 mb-1.5 flex items-center gap-1">
-              <i class="fa-solid fa-briefcase"></i> Jam Normal
+              <Icon name="briefcase" /> Jam Normal
             </div>
             <div class="grid grid-cols-2 gap-1.5">
               <div><label for="jm" class="block text-[10px] text-gray-500 mb-0.5">Masuk</label>
@@ -393,7 +394,7 @@
           </div>
           <div class="bg-gray-50 rounded-md p-2">
             <div class="text-[10px] font-semibold text-gray-600 mb-1.5 flex items-center gap-1">
-              <i class="fa-solid fa-mosque"></i> Jam Ramadan
+              <Icon name="mosque" /> Jam Ramadan
             </div>
             <div class="grid grid-cols-2 gap-1.5">
               <div><label for="jmr" class="block text-[10px] text-gray-500 mb-0.5">Masuk</label>
@@ -423,7 +424,7 @@
     <!-- Notifikasi WA -->
     <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-2">
       <div class="px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-700">
-        <i class="fa-brands fa-whatsapp mr-0.5"></i> Notifikasi WA (Rekap Gambar)
+        <Icon name="whatsapp" class="mr-0.5" /> Notifikasi WA (Rekap Gambar)
       </div>
       <div class="p-2.5">
         <label for="wag" class="block text-xs font-medium text-gray-700 mb-0.5">Grup WA Instansi</label>
@@ -440,7 +441,7 @@
             {#if waTesting === 'sending'}
               <Loading variant="button" label="Mengirim..." />
             {:else}
-              <i class="fa-solid fa-paper-plane mr-0.5"></i>Kirim Tes
+              <Icon name="paper-plane" class="mr-0.5" />Kirim Tes
             {/if}
           </button>
         </div>
@@ -450,8 +451,8 @@
     <!-- Jadwal Auto Scrape -->
     <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-2">
       <div class="px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-700 flex items-center justify-between">
-        <span><i class="fa-solid fa-calendar-days mr-0.5"></i> Jadwal Auto Scrape</span>
-        <button onclick={() => { cancelEdit(); showAddForm = true; }} class="text-[10px] px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100"><i class="fa-solid fa-plus mr-0.5"></i> Tambah</button>
+        <span><Icon name="calendar-days" class="mr-0.5" /> Jadwal Auto Scrape</span>
+        <button onclick={() => { cancelEdit(); showAddForm = true; }} class="text-[10px] px-1.5 py-0.5 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100"><Icon name="plus" class="mr-0.5" /> Tambah</button>
       </div>
       <div class="p-2.5">
         {#if showAddForm}
@@ -468,12 +469,12 @@
             
             <!-- Kirim Notifikasi -->
             <div class="border-t border-gray-200 pt-2">
-              <div class="text-[10px] font-semibold text-gray-600 mb-1.5"><i class="fa-solid fa-paper-plane mr-0.5"></i> Kirim Notifikasi</div>
+              <div class="text-[10px] font-semibold text-gray-600 mb-1.5"><Icon name="paper-plane" class="mr-0.5" /> Kirim Notifikasi</div>
               
               <!-- WhatsApp -->
               <div class="flex items-center justify-between mb-1.5">
                 <div class="flex items-center gap-1.5">
-                  <i class="fa-brands fa-whatsapp text-green-600 text-xs"></i>
+                  <Icon name="whatsapp" class="text-green-600 text-xs" />
                   <span class="text-[10px] font-medium text-gray-700">WhatsApp</span>
                 </div>
                 <button onclick={() => newWAEnabled = !newWAEnabled}
@@ -498,7 +499,7 @@
               <!-- Telegram -->
               <div class="flex items-center justify-between mt-1.5">
                 <div class="flex items-center gap-1.5">
-                  <i class="fa-brands fa-telegram text-blue-500 text-xs"></i>
+                  <Icon name="telegram" class="text-blue-500 text-xs" />
                   <span class="text-[10px] font-medium text-gray-700">Telegram</span>
                 </div>
                 <button onclick={() => newTelegramEnabled = !newTelegramEnabled}
@@ -527,31 +528,31 @@
                     <div><div class="text-xs font-medium text-gray-900">{s.label}</div><div class="text-[10px] text-gray-500">{modeLabel(s.mode)}</div></div>
                   </div>
                   <div class="flex items-center gap-0.5">
-                    <button onclick={() => startEdit(s)} class="p-1 text-gray-400 hover:text-blue-500 rounded-md hover:bg-blue-50" aria-label="Edit"><i class="fa-solid fa-pen text-[10px]"></i></button>
+                    <button onclick={() => startEdit(s)} class="p-1 text-gray-400 hover:text-blue-500 rounded-md hover:bg-blue-50" aria-label="Edit"><Icon name="pen" class="text-[10px]" /></button>
                     <button onclick={() => toggleSchedule(s.id)} class="w-8 h-5 rounded-full transition-colors {s.aktif ? 'bg-green-500' : 'bg-gray-300'} relative" aria-label="Toggle">
                       <span class="absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform {s.aktif ? 'translate-x-3' : ''}"></span></button>
-                    <button onclick={() => deleteSchedule(s.id)} class="p-1 text-gray-400 hover:text-red-500 rounded-md hover:bg-red-50" aria-label="Hapus"><i class="fa-solid fa-trash text-[10px]"></i></button>
+                    <button onclick={() => deleteSchedule(s.id)} class="p-1 text-gray-400 hover:text-red-500 rounded-md hover:bg-red-50" aria-label="Hapus"><Icon name="trash" class="text-[10px]" /></button>
                   </div>
                 </div>
                 <!-- Row 2: Notification badges -->
                 <div class="flex items-center gap-1.5 mt-1.5 ml-10">
                   {#if s.wa_enabled !== false}
                     <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[8px] font-medium bg-green-50 text-green-700">
-                      <i class="fa-brands fa-whatsapp"></i> WA
+                      <Icon name="whatsapp" /> WA
                       {#if s.wa_group}<span class="text-green-500 ml-0.5">({s.wa_group.substring(0, 12)}...)</span>{/if}
                     </span>
                   {:else}
                     <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[8px] font-medium bg-gray-50 text-gray-400">
-                      <i class="fa-brands fa-whatsapp"></i> WA off
+                      <Icon name="whatsapp" /> WA off
                     </span>
                   {/if}
                   {#if s.telegram_enabled}
                     <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[8px] font-medium bg-blue-50 text-blue-700">
-                      <i class="fa-brands fa-telegram"></i> TG
+                      <Icon name="telegram" /> TG
                     </span>
                   {:else}
                     <span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[8px] font-medium bg-gray-50 text-gray-400">
-                      <i class="fa-brands fa-telegram"></i> TG off
+                      <Icon name="telegram" /> TG off
                     </span>
                   {/if}
                 </div>
@@ -564,7 +565,7 @@
 
     <!-- Hari Libur -->
     <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-2">
-      <div class="px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-700"><i class="fa-solid fa-umbrella-beach mr-0.5"></i> Hari Libur</div>
+      <div class="px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-700"><Icon name="umbrella-beach" class="mr-0.5" /> Hari Libur</div>
       <div class="p-2.5">
         <div class="text-[10px] font-semibold text-gray-600 mb-1.5">Libur mingguan (auto-scrape dilewati)</div>
         <div class="flex gap-1.5 flex-wrap mb-2">
@@ -583,7 +584,7 @@
         <div class="flex gap-1.5 mb-2">
           <input type="date" bind:value={newLiburTgl} aria-label="Tanggal libur" class="flex-1 px-2 py-1 border border-gray-300 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500" />
           <input type="text" bind:value={newLiburKet} placeholder="Keterangan" class="flex-1 px-2 py-1 border border-gray-300 rounded-md text-xs outline-none focus:ring-2 focus:ring-blue-500" />
-          <button onclick={addLiburTanggal} class="px-2.5 py-1 bg-green-600 hover:bg-green-700 text-white rounded-md text-xs" aria-label="Tambah libur"><i class="fa-solid fa-plus"></i></button>
+          <button onclick={addLiburTanggal} class="px-2.5 py-1 bg-green-600 hover:bg-green-700 text-white rounded-md text-xs" aria-label="Tambah libur"><Icon name="plus" /></button>
         </div>
         {#if liburTanggal.length === 0}
           <p class="text-xs text-gray-400 text-center py-2">Belum ada tanggal libur khusus</p>
@@ -592,7 +593,7 @@
             {#each liburTanggal as l (l.id)}
               <div class="flex items-center justify-between px-2 py-1 rounded-md border border-gray-100 text-xs">
                 <span class="font-medium text-gray-800">{l.tanggal}{#if l.keterangan}<span class="text-gray-400 font-normal"> — {l.keterangan}</span>{/if}</span>
-                <button onclick={() => delLiburTanggal(l.id, l.tanggal)} class="p-1 text-gray-400 hover:text-red-500" aria-label="Hapus"><i class="fa-solid fa-trash text-[10px]"></i></button>
+                <button onclick={() => delLiburTanggal(l.id, l.tanggal)} class="p-1 text-gray-400 hover:text-red-500" aria-label="Hapus"><Icon name="trash" class="text-[10px]" /></button>
               </div>
             {/each}
           </div>
@@ -602,7 +603,7 @@
 
     <!-- Worker -->
     <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-2">
-      <div class="px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-700"><i class="fa-solid fa-microchip mr-0.5"></i> Worker Scrape</div>
+      <div class="px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-700"><Icon name="microchip" class="mr-0.5" /> Worker Scrape</div>
       <div class="p-2.5">
         <label for="wc" class="block text-xs font-medium text-gray-700 mb-0.5">Jumlah Worker Paralel</label>
         <div class="flex gap-1.5">
@@ -615,10 +616,10 @@
 
     <!-- Import -->
     <div class="bg-white rounded-lg border border-gray-200 shadow-sm mb-2">
-      <div class="px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-700"><i class="fa-solid fa-file-import mr-0.5"></i> Import Pegawai</div>
+      <div class="px-3 py-1.5 border-b border-gray-200 text-xs font-semibold text-gray-700"><Icon name="file-import" class="mr-0.5" /> Import Pegawai</div>
       <div class="p-2.5">
         <input type="file" accept=".json" bind:this={fileInput} class="block w-full text-[10px] text-gray-500 file:mr-3 file:py-1 file:px-3 file:rounded-md file:border-0 file:text-[10px] file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mb-2" />
-        <button onclick={importPegawai} class="w-full px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-medium transition-colors"><i class="fa-solid fa-cloud-arrow-up mr-0.5"></i> Import dari JSON</button>
+        <button onclick={importPegawai} class="w-full px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-medium transition-colors"><Icon name="cloud-arrow-up" class="mr-0.5" /> Import dari JSON</button>
       </div>
     </div>
   {/if}

@@ -5,6 +5,7 @@
   import ConfirmDialog from '$lib/components/ConfirmDialog.svelte';
   import { pegawai, scrape } from '$lib/api.js';
   import { toasts } from '$lib/stores/toast.js';
+  import Icon from '$lib/components/Icon.svelte';
 
   let pegawaiList = $state([]);
   let showModal = $state(false);
@@ -76,10 +77,10 @@
 <Layout title="Pegawai" activePage="pegawai">
   <Breadcrumb items={[{ label: 'Beranda', href: '/dashboard' }, { label: 'Pegawai' }]} />
   <div class="flex items-center justify-between mb-2">
-    <h2 class="text-xs font-semibold text-gray-700"><i class="fa-solid fa-users mr-0.5"></i> Daftar Pegawai</h2>
+    <h2 class="text-xs font-semibold text-gray-700"><Icon name="users" class="mr-0.5" /> Daftar Pegawai</h2>
     <button onclick={showAdd}
             class="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-medium transition-colors">
-      <i class="fa-solid fa-plus mr-0.5"></i>Tambah
+      <Icon name="plus" class="mr-0.5" />Tambah
     </button>
   </div>
   
@@ -104,7 +105,7 @@
                   {#if scrapingNip === p.nip}
                     <div class="w-3 h-3 border-2 border-yellow-200 border-t-yellow-600 rounded-full animate-spin mx-auto"></div>
                   {:else}
-                    <i class="fa-solid fa-bolt text-[10px]"></i>
+                    <Icon name="bolt" class="text-[10px]" />
                   {/if}
                 </button>
               </td>
@@ -112,11 +113,11 @@
                 <div class="flex items-center justify-center gap-0.5">
                   <button onclick={() => showEdit(p)} aria-label="Edit pegawai"
                           class="p-1 rounded-md border border-gray-200 hover:bg-blue-50 text-blue-600 transition-colors">
-                    <i class="fa-solid fa-pen text-[10px]"></i>
+                    <Icon name="pen" class="text-[10px]" />
                   </button>
                   <button onclick={() => del(p.id)} aria-label="Nonaktifkan pegawai"
                           class="p-1 rounded-md border border-gray-200 hover:bg-red-50 text-red-600 transition-colors">
-                    <i class="fa-solid fa-trash text-[10px]"></i>
+                    <Icon name="trash" class="text-[10px]" />
                   </button>
                 </div>
               </td>
@@ -136,7 +137,7 @@
     <div class="absolute inset-0 bg-black/50" onclick={closeModal} role="presentation"></div>
     <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-4 relative z-10">
       <button onclick={closeModal} class="absolute top-2 right-2 p-0.5 rounded-md hover:bg-gray-100 text-gray-400" aria-label="Tutup">
-        <i class="fa-solid fa-xmark text-xs"></i>
+        <Icon name="xmark" class="text-xs" />
       </button>
       <h3 class="text-sm font-semibold text-gray-900 mb-0.5">{editingId ? 'Edit' : 'Tambah'} Pegawai</h3>
       <p class="text-[10px] text-gray-500 mb-3">Isi data pegawai dan password Pusaka.</p>
